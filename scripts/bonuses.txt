@@ -29,6 +29,9 @@ WhenBroadcastReceived(initialise)
     TYPE.EFFECT = 1;
     TYPE.DESTROYED = 2;
     BONUS.SIZE = 60;
+    BONUS.+1 BALL = 1;
+    BONUS.x2 DAMAGE = 2;
+    BONUS.POWER UP = 3;
 }
 
 WhenBroadcastReceived(raise row by three pixels)
@@ -60,37 +63,7 @@ WhenBroadcastReceived(reset game)
     List.DeleteAll(Bonus.hits remaining);
 }
 
-WhenBroadcastReceived(update counters)
-{
-    If (clone? == 1)
-    {
-        If (clone.type == TYPE.EFFECT)
-        {
-            Looks.ChengeSizeBy(4);
-            Looks.ChangeEffectBy(GHOST, 8);
-            effect.counter += 1;
-            If (effect.counter > 10)
-            {
-                Control.DeleteThisClone();
-            }
-        }
-        Else
-        {
-            If (clone.type == TYPE.DESTROYED)
-            {
-                Looks.ChengeSizeBy(10);
-                Looks.ChangeEffectBy(GHOST, 4);
-                effect.counter += 1;
-                If (effect.counter > 24)
-                {
-                    Control.DeleteThisClone();
-                }
-            }
-        }
-    }
-}
-
-WhenBroadcastReceived(update effects)
+WhenBroadcastReceived(update hits on objects)
 {
     If (clone? == 1)
     {
@@ -120,7 +93,7 @@ WhenBroadcastReceived(update effects)
     }
 }
 
-WhenBroadcastReceived(update obstacles)
+WhenBroadcastReceived(update object positions)
 {
     If (clone? == 1)
     {
@@ -136,6 +109,44 @@ WhenBroadcastReceived(update obstacles)
                 {
                     List.ReplaceItem(Bonus.hits remaining, bonus.id, 0);
                     Control.DeleteThisClone();
+                }
+            }
+        }
+    }
+}
+
+WhenBroadcastReceived(update objects appearence)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.EFFECT)
+        {
+            Looks.ChengeSizeBy(4);
+            Looks.ChangeEffectBy(GHOST, 8);
+            effect.counter += 1;
+            If (effect.counter > 10)
+            {
+                Control.DeleteThisClone();
+            }
+        }
+        Else
+        {
+            If (clone.type == TYPE.DESTROYED)
+            {
+                Looks.ChengeSizeBy(10);
+                Looks.ChangeEffectBy(GHOST, 4);
+                effect.counter += 1;
+                If (effect.counter > 24)
+                {
+                    Control.DeleteThisClone();
+                }
+            }
+            Else
+            {
+                If (Costume.GetNumberName(number) == BONUS.POWER UP)
+                {
+                    Looks.SetSizeTo((BONUS.SIZE + (4 * cos(((29 * bonus.id) + (Sensing.Timer() * 200))))));
+                    Motion.TurnRight(1);
                 }
             }
         }
@@ -160,7 +171,7 @@ Control.WhenIStartAsClone()
 Define add obstacle (warp=true)
 {
     Looks.ClearGraphicEffects();
-    Looks.SwitchCostumeTo(Operator.Random(1 / 2));
+    Looks.SwitchCostumeTo(Operator.Random(1 / 3));
     Motion.PointInDirection(90);
     Looks.SetSizeTo(1000);
     Motion.GoToXY(NewRow.BonusData[1], -200);
@@ -179,6 +190,7 @@ Define add obstacle (warp=true)
 //----- Costumes ------------------------------------------------------------------------------------------------------
 
 +1 ball.svg
+power.svg
 x2 damage.svg
 
 

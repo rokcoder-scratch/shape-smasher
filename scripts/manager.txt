@@ -1,24 +1,24 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-column = 5
+column = 1
 columns = 7
 counter = -1
 index = 8
-points = 3
+points = 7
 pressed? = 
-row = 19
+row = 1
 total = 0
 
 
 //----- Lists ---------------------------------------------------------------------------------------------------------
 
 hit distribution = { 
+    7
     0
-    13
     0
     0
-    30
+    0
     0
     0
 }
@@ -56,8 +56,8 @@ WhenGreenFlagClicked()
             Repeat (15)
             {
                 Event.Broadcast("raise row by three pixels");
-                Event.Broadcast("update obstacles");
-                Event.Broadcast("update counters");
+                Event.Broadcast("update object positions");
+                Event.Broadcast("update objects appearence");
             }
             If (Game over? == 0)
             {
@@ -158,8 +158,6 @@ Define add row (warp=true)
 
 Define get target (warp=false)
 {
-    Event.Broadcast("update obstacles");
-    Event.Broadcast("update counters");
     Event.Broadcast("prepare target");
     Sensing.ResetTimer();
     counter = -1;
@@ -168,7 +166,7 @@ Define get target (warp=false)
     {
         Event.Broadcast("calculate target velocity");
         Event.Broadcast("show target");
-        Event.Broadcast("update counters");
+        Event.Broadcast("update objects appearence");
         If (Not (((Sensing.MouseX() > 168) And (Sensing.MouseY() < -150))))
         {
             If ((Not (Sensing.MouseDown())) And (pressed? == 1))
@@ -203,9 +201,8 @@ Define play level (warp=false)
         Pen.Clear();
         Event.Broadcast("hide effects");
         Event.Broadcast("update ball");
-        Event.Broadcast("check bonus collisions");
-        Event.Broadcast("update effects");
-        Event.Broadcast("update counters");
+        Event.Broadcast("update hits on objects");
+        Event.Broadcast("update objects appearence");
         Event.Broadcast("update hud");
     }
 }

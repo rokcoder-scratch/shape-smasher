@@ -84,37 +84,7 @@ WhenBroadcastReceived(reset game)
     List.DeleteAll(Obstacle.hit?);
 }
 
-WhenBroadcastReceived(update counters)
-{
-    If (clone? == 1)
-    {
-        If (clone.type == TYPE.EFFECT)
-        {
-            Looks.ChengeSizeBy(4);
-            Looks.ChangeEffectBy(GHOST, 8);
-            effect.counter += 1;
-            If (effect.counter > 10)
-            {
-                Control.DeleteThisClone();
-            }
-        }
-        Else
-        {
-            If (clone.type == TYPE.DESTROYED)
-            {
-                Looks.ChengeSizeBy(10);
-                Looks.ChangeEffectBy(GHOST, 4);
-                effect.counter += 1;
-                If (effect.counter > 24)
-                {
-                    Control.DeleteThisClone();
-                }
-            }
-        }
-    }
-}
-
-WhenBroadcastReceived(update effects)
+WhenBroadcastReceived(update hits on objects)
 {
     If (clone? == 1)
     {
@@ -144,7 +114,7 @@ WhenBroadcastReceived(update effects)
     }
 }
 
-WhenBroadcastReceived(update obstacles)
+WhenBroadcastReceived(update object positions)
 {
     If (clone? == 1)
     {
@@ -153,6 +123,36 @@ WhenBroadcastReceived(update obstacles)
             Looks.SetSizeTo(1000);
             Motion.GoToXY(Obstacle.x[obstacle.id], Obstacle.y[obstacle.id]);
             Looks.SetSizeTo(Obstacle.scale[obstacle.id]);
+        }
+    }
+}
+
+WhenBroadcastReceived(update objects appearence)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.EFFECT)
+        {
+            Looks.ChengeSizeBy(4);
+            Looks.ChangeEffectBy(GHOST, 8);
+            effect.counter += 1;
+            If (effect.counter > 10)
+            {
+                Control.DeleteThisClone();
+            }
+        }
+        Else
+        {
+            If (clone.type == TYPE.DESTROYED)
+            {
+                Looks.ChengeSizeBy(10);
+                Looks.ChangeEffectBy(GHOST, 4);
+                effect.counter += 1;
+                If (effect.counter > 24)
+                {
+                    Control.DeleteThisClone();
+                }
+            }
         }
     }
 }

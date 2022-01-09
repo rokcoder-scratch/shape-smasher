@@ -4,10 +4,10 @@ angle = -270
 ball.id = 0
 ball.multiplier = 1
 ball.size = 0
-clone.id = 12
+clone.id = 3
 clone? = 0
 collided? = 0
-counter = 81
+counter = 139
 delta = 0.98430321521685
 delta.x = 0
 delta.y = 0
@@ -19,7 +19,7 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 11
+launched ball count = 2
 launching? = 0
 magnitude = 20.670367519554
 normal.angle = -352
@@ -33,8 +33,8 @@ unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
 unit.vel.x = -0.57372861465068
 unit.vel.y = -0.8190454668277
-vel.x = 5.3972099471234
-vel.y = -19.327684468471
+vel.x = -7.3254334350014
+vel.y = -18.744590258411
 velocity = 0
 x = 0
 y = 180
@@ -158,6 +158,33 @@ Define //TODO(string comment) (warp=true)
 {
 }
 
+Define bonus +1 ball (warp=true)
+{
+    Active ball count += 1;
+    Ball count += 1;
+    x = vel.x;
+    y = vel.y;
+    vel.x = 0;
+    vel.y = 6;
+    id cache = clone.id;
+    clone.id = (List.Length(Ball.multiplier) + 1);
+    Control.CreateCloneOf(_myself_);
+    clone.id = id cache;
+    vel.x = x;
+    vel.y = y;
+}
+
+Define bonus power up (warp=true)
+{
+}
+
+Define bonus x2 damage (warp=true)
+{
+    List.ReplaceItem(Ball.multiplier, clone.id, 2);
+    ball.multiplier = 2;
+    Looks.SwitchCostumeTo(ball2);
+}
+
 Define calculate bonus collision (warp=true)
 {
     Call //TODO("index 1 may have long gone - should start from the least id that's on the screen");
@@ -180,31 +207,31 @@ Define calculate bonus collision (warp=true)
         index += 1;
     }
     List.ReplaceItem(Bonus.hit?, ball.id, 1);
-    If ((ball.multiplier == 2) And (Bonus.type[ball.id] == 2))
+    If ((ball.multiplier == 2) And (Bonus.type[ball.id] == BONUS.x2 DAMAGE))
     {
         Stop(this script);
     }
     List.ReplaceItem(Bonus.hits remaining, ball.id, 0);
-    If (Bonus.type[ball.id] == 1)
+    If (Bonus.type[ball.id] == BONUS.+1 BALL)
     {
-        Active ball count += 1;
-        Ball count += 1;
-        x = vel.x;
-        y = vel.y;
-        vel.x = 0;
-        vel.y = 6;
-        id cache = clone.id;
-        clone.id = (List.Length(Ball.multiplier) + 1);
-        Control.CreateCloneOf(_myself_);
-        clone.id = id cache;
-        vel.x = x;
-        vel.y = y;
+        Call bonus +1 ball;
     }
     Else
     {
-        List.ReplaceItem(Ball.multiplier, clone.id, 2);
-        ball.multiplier = 2;
-        Looks.SwitchCostumeTo(ball2);
+        If (Bonus.type[ball.id] == BONUS.x2 DAMAGE)
+        {
+            Call bonus x2 damage;
+        }
+        Else
+        {
+            If (Bonus.type[ball.id] == BONUS.POWER UP)
+            {
+                Call bonus power up;
+            }
+            Else
+            {
+            }
+        }
     }
     If (SfxVolume > 0)
     {

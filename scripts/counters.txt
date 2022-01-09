@@ -1,11 +1,11 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-counters exist up to index = 54
-digit = 2
+counters exist up to index = 1
+digit = 1
 digits = 100
 hits remaining = 
-index = 55
+index = 2
 
 
 
@@ -44,7 +44,7 @@ WhenBroadcastReceived(reset game)
     counters exist up to index = 0;
 }
 
-WhenBroadcastReceived(update counters)
+WhenBroadcastReceived(update objects appearence)
 {
     If (clone? == 1)
     {
