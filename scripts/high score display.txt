@@ -1,0 +1,399 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+added? = false
+characters = -_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
+CHAR HEIGHT = 16
+CHAR WIDTH = 10
+clone? = false
+highlight? = 
+i = 6
+index = 50
+maxTop = -60
+top = 0
+username = RokCoder
+x = 78
+y = -150
+y pos = 83
+
+
+//----- Lists ---------------------------------------------------------------------------------------------------------
+
+characters = { 
+    -
+    _
+    0
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    A
+    B
+    C
+    D
+    E
+    F
+    G
+    H
+    I
+    J
+    K
+    L
+    M
+    N
+    O
+    P
+    Q
+    R
+    S
+    T
+    U
+    V
+    W
+    X
+    Y
+    Z
+}
+costumes = { 
+    hyphen
+    underscore
+    zero
+    one
+    two
+    three
+    four
+    five
+    six
+    seven
+    eight
+    nine
+    A
+    B
+    C
+    D
+    E
+    F
+    G
+    H
+    I
+    J
+    K
+    L
+    M
+    N
+    O
+    P
+    Q
+    R
+    S
+    T
+    U
+    V
+    W
+    X
+    Y
+    Z
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(end high score display)
+{
+    If (clone? == "false")
+    {
+        Looks.Hide();
+        Stop(other scripts in sprite);
+        Pen.Clear();
+    }
+}
+
+WhenBroadcastReceived(High Scores)
+{
+    Event.BroadcastAndWait("High Scores Read");
+    Call Get username;
+    Call Set top;
+    Looks.Hide();
+    Control.CreateCloneOf(_myself_);
+    Call Show Scores(top);
+    Control.Wait(4);
+    Forever
+    {
+        Repeat Until (Not ((top < 0)))
+        {
+            Call Show Scores(top);
+            top += 0.125;
+        }
+        top = 0;
+        Call Show Scores(top);
+        Control.Wait(4);
+        Repeat Until (Not ((top > maxTop)))
+        {
+            Call Show Scores(top);
+            top += -0.125;
+        }
+        top = maxTop;
+        Call Show Scores(top);
+        Control.Wait(1);
+    }
+}
+
+WhenBroadcastReceived(initialise)
+{
+    clone? = "false";
+    CHAR WIDTH = 10;
+    CHAR HEIGHT = 16;
+    Looks.Hide();
+    Motion.GoToXY(0, 0);
+    Call Initialise;
+}
+
+WhenBroadcastReceived(update high score table)
+{
+    Call update scores;
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    Looks.SetSizeTo(100);
+    Looks.SwitchCostumeTo(title sprite);
+    Looks.Show();
+    Motion.GoToXY(0, 0);
+    Wait Until (Not (Sensing.MouseDown()));
+    Wait Until (Sensing.MouseDown() And (Not (((Sensing.MouseX() > 168) And (Sensing.MouseY() < -150)))));
+    Event.BroadcastAndWait("fade in thumb");
+    Event.Broadcast("end high score display");
+    Control.DeleteThisClone();
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define add new high score(string score)(string rows)(string balls) (warp=true)
+{
+    Call Get username;
+    index = 1;
+    Repeat (50)
+    {
+        If (score > Highscore.Score[index])
+        {
+            added? = "true";
+            List.InsertItem(Highscore.Score, index, score);
+            List.InsertItem(Highscore.Name, index, username);
+            List.InsertItem(Highscore.Row, index, rows);
+            List.InsertItem(Highscore.Ball, index, balls);
+            i = index;
+            Repeat Until (index == 50)
+            {
+                index += 1;
+                If (Highscore.Name[index] == username)
+                {
+                    List.DeleteItem(Highscore.Score, index);
+                    List.DeleteItem(Highscore.Name, index);
+                    List.DeleteItem(Highscore.Row, index);
+                    List.DeleteItem(Highscore.Ball, index);
+                    Stop(this script);
+                }
+            }
+            List.DeleteItem(Highscore.Score, List.Length(Highscore.Score));
+            List.DeleteItem(Highscore.Name, List.Length(Highscore.Name));
+            List.DeleteItem(Highscore.Row, List.Length(Highscore.Row));
+            List.DeleteItem(Highscore.Ball, List.Length(Highscore.Ball));
+            Stop(this script);
+        }
+        If (Highscore.Name[index] == username)
+        {
+            Stop(this script);
+        }
+        index += 1;
+    }
+}
+
+Define Get username (warp=true)
+{
+    username = "";
+    i = 1;
+    Repeat (11)
+    {
+        If (Not ((i > Variable.Length(Sensing.Username()))))
+        {
+            username = Operator.Join(username, Operator.LetterOf(Sensing.Username(), i));
+        }
+        i += 1;
+    }
+}
+
+Define Initialise (warp=true)
+{
+    characters = "-_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    List.DeleteAll(characters);
+    index = 1;
+    Repeat (Variable.Length(characters))
+    {
+        List.Add(characters, Operator.LetterOf(characters, index));
+        index += 1;
+    }
+}
+
+Define Print(string x)(string y)(string text)(bool erase first?)(bool highlight?) (warp=true)
+{
+    Looks.SwitchCostumeTo(title sprite);
+    Looks.SetSizeTo(50);
+    x = ((x * CHAR WIDTH) - 194);
+    y = (194 - (y * CHAR HEIGHT));
+    Motion.GoToXY(x, y);
+    i = 1;
+    Repeat (Variable.Length(text))
+    {
+        If erase first?
+        {
+            Looks.SwitchCostumeTo(blank);
+            Pen.Stamp();
+        }
+        Looks.SwitchCostumeTo(costumes[List.IndexOf(characters, Operator.LetterOf(text, i))]);
+        If highlight?
+        {
+            Looks.SetEffectTo(BRIGHTNESS, 20);
+            Looks.SetEffectTo(COLOR, 70);
+        }
+        Else
+        {
+            Looks.SetEffectTo(BRIGHTNESS, 90);
+            Looks.SetEffectTo(COLOR, 70);
+        }
+        Pen.Stamp();
+        Looks.ClearGraphicEffects();
+        x += CHAR WIDTH;
+        Motion.GoToXY(x, y);
+        i += 1;
+    }
+}
+
+Define Set top (warp=true)
+{
+    maxTop = 50;
+    maxTop = ((maxTop - 10) * -1.5);
+    index = 50;
+    Repeat Until ((Highscore.Name[index] == username) Or (index == 1))
+    {
+        index += -1;
+    }
+    top = (8.4 - (index * 1.5));
+    If (top > 0)
+    {
+        top = 0;
+    }
+    Else
+    {
+        If (top < maxTop)
+        {
+            top = maxTop;
+        }
+    }
+}
+
+Define Show Scores(string y offset) (warp=true)
+{
+    Motion.GoToXY(0, 0);
+    Pen.Clear();
+    y pos = (8 + y offset);
+    index = 0;
+    Repeat (50)
+    {
+        If ((y pos > 7) And (y pos < 23))
+        {
+            highlight? = (Highscore.Name[(index + 1)] == username);
+            If (index < 9)
+            {
+                Call Print(1.5)(y pos)((index + 1))()((highlight? == "true"));
+            }
+            Else
+            {
+                Call Print(0.5)(y pos)((index + 1))()((highlight? == "true"));
+            }
+            Call Print(3)(y pos)(Highscore.Name[(index + 1)])()((highlight? == "true"));
+            If (Highscore.Ball[(index + 1)] == 0)
+            {
+                Call Print(15)(y pos)("---")()((highlight? == "true"));
+                Call Print(18.6)(y pos)("---")()((highlight? == "true"));
+            }
+            Else
+            {
+                Call Print(15)(y pos)(Highscore.Ball[(index + 1)])()((highlight? == "true"));
+                Call Print(18.6)(y pos)(Highscore.Row[(index + 1)])()((highlight? == "true"));
+            }
+            Call Print(22.2)(y pos)(Highscore.Score[(index + 1)])()((highlight? == "true"));
+        }
+        index += 1;
+        y pos += 1.5;
+    }
+}
+
+Define update scores (warp=false)
+{
+    Event.BroadcastAndWait("High Scores Read");
+    added? = "false";
+    Call add new high score(Score)(Sensing.Of(row, obstacles))(Ball count);
+    If (added? == "true")
+    {
+        Event.BroadcastAndWait("High Scores Write");
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+A.svg
+B.svg
+blank.png
+C.svg
+D.svg
+dot.svg
+E.svg
+eight.svg
+F.svg
+five.svg
+four.svg
+G.svg
+H.svg
+hyphen.svg
+I.svg
+J.svg
+K.svg
+L.svg
+M.svg
+N.svg
+nine.svg
+O.svg
+one.svg
+P.svg
+Q.svg
+R.svg
+S.svg
+seven.svg
+six.svg
+T.svg
+three.svg
+title sprite.svg
+title stage.svg
+two.svg
+U.svg
+underscore.svg
+V.svg
+W.svg
+X.svg
+Y.svg
+Z.svg
+zero.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

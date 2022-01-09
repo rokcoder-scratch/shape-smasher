@@ -1,0 +1,96 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+delta.x = 220
+delta.y = -70
+frames = 10
+index = 11
+length = 70
+mouse.x = 14
+mouse.y = 180
+t = 10.62
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(calculate target velocity)
+{
+    If (clone? == 0)
+    {
+        frames = 10;
+        mouse.x = Sensing.MouseX();
+        mouse.y = Sensing.MouseY();
+        delta.x = (mouse.x - SCREEN.X.OFFSET);
+        delta.y = (mouse.y - 180);
+        length = sqrt(((delta.x * delta.x) + (delta.y * delta.y)));
+        delta.x = (delta.x * (220 / length));
+        delta.y = (delta.y * (220 / length));
+        If (delta.y > -70)
+        {
+            delta.y = -70;
+        }
+        Vel.x = (delta.x / frames);
+        Vel.y = ((delta.y - ((Sensing.Of(GRAVITY, balls) * (frames * frames)) / 2)) / frames);
+    }
+}
+
+WhenBroadcastReceived(initialise)
+{
+    clone? = 0;
+    Looks.Hide();
+    Looks.SetSizeTo(20);
+}
+
+WhenBroadcastReceived(prepare target)
+{
+    Call prepare target;
+}
+
+WhenBroadcastReceived(remove target)
+{
+    Control.DeleteThisClone();
+}
+
+WhenBroadcastReceived(show target)
+{
+    If (clone? == 1)
+    {
+        t = index;
+        Looks.SetSizeTo(1000);
+        Motion.GoToXY((SCREEN.X.OFFSET + (Vel.x * t)), (180 + ((Vel.y * t) + ((Sensing.Of(GRAVITY, balls) * (t * t)) / 2))));
+        Looks.SetSizeTo((100 - (index * 3)));
+    }
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define prepare target (warp=true)
+{
+    index = 0;
+    Repeat (11)
+    {
+        Control.CreateCloneOf(_myself_);
+        index += 1;
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+ball.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

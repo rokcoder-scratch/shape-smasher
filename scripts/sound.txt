@@ -1,0 +1,81 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+type = master
+
+
+
+//----- Sprite clicked events -----------------------------------------------------------------------------------------
+
+WhenThisSpriteClicked()
+{
+    If (type == "sfx")
+    {
+        If (Costume.GetNumberName(name) == "sfx")
+        {
+            Looks.SwitchCostumeTo(sfx2);
+            Event.Broadcast("sfx off");
+        }
+        Else
+        {
+            Looks.SwitchCostumeTo(sfx);
+            Event.Broadcast("sfx on");
+        }
+    }
+    Else
+    {
+        If (type == "music")
+        {
+            If (Costume.GetNumberName(name) == "music")
+            {
+                Looks.SwitchCostumeTo(music2);
+                Event.Broadcast("music off");
+            }
+            Else
+            {
+                Looks.SwitchCostumeTo(music);
+                Event.Broadcast("music on");
+            }
+        }
+    }
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(initialise)
+{
+    Looks.Hide();
+    Costume.GoToFrontBack(front);
+    Looks.SetSizeTo(90);
+    Looks.SetEffectTo(BRIGHTNESS, -20);
+    Looks.SwitchCostumeTo(sfx);
+    type = "sfx";
+    Motion.GoToXY(220, -161);
+    Control.CreateCloneOf(_myself_);
+    Looks.SwitchCostumeTo(music);
+    type = "music";
+    Motion.GoToXY(183, -161);
+    Control.CreateCloneOf(_myself_);
+    type = "master";
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    Looks.Show();
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+music.svg
+music2.svg
+sfx.svg
+sfx2.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

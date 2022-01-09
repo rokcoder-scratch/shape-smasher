@@ -1,0 +1,224 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+column = 5
+columns = 7
+counter = -1
+index = 8
+points = 3
+pressed? = 
+row = 19
+total = 0
+
+
+//----- Lists ---------------------------------------------------------------------------------------------------------
+
+hit distribution = { 
+    0
+    13
+    0
+    0
+    30
+    0
+    0
+}
+
+
+//----- Green flag events ---------------------------------------------------------------------------------------------
+
+WhenGreenFlagClicked()
+{
+    Pen.Clear();
+    Looks.Hide();
+    Sound.SetVolumeTo(100);
+    Event.Broadcast("play music");
+    Control.CreateCloneOf(_myself_);
+    row = 0;
+    clone? = 0;
+    SCREEN.X.OFFSET = -56;
+    Motion.GoToXY(SCREEN.X.OFFSET, 0);
+    Event.BroadcastAndWait("initialise");
+    Score = 0;
+    Costume.GoToFrontBack(front);
+    Costume.MoveLayers(backward, 1);
+    Event.Broadcast("update hud");
+    Forever
+    {
+        Event.BroadcastAndWait("High Scores");
+        Event.Broadcast("fade out title");
+        Event.BroadcastAndWait("reset game");
+        Score = 0;
+        Call add row;
+        Game over? = 0;
+        Repeat Until (Game over? == 1)
+        {
+            Event.BroadcastAndWait("prepare counters");
+            Repeat (15)
+            {
+                Event.Broadcast("raise row by three pixels");
+                Event.Broadcast("update obstacles");
+                Event.Broadcast("update counters");
+            }
+            If (Game over? == 0)
+            {
+                Event.Broadcast("update hud");
+                Call get target;
+                Call play level;
+                Call add row;
+            }
+        }
+        Event.Broadcast("fade in title");
+        Event.BroadcastAndWait("update high score table");
+        Event.Broadcast("remove sprites");
+    }
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(music off)
+{
+    Sound.SetVolumeTo(0);
+}
+
+WhenBroadcastReceived(music on)
+{
+    Sound.SetVolumeTo(100);
+}
+
+WhenBroadcastReceived(play music)
+{
+    If (Operator.Random(0.0 / 1.0) < 0.5)
+    {
+        Sound.PlayUntilDone(Purple Planet Music - Mirrorball (1_58) 140bpm);
+    }
+    Forever
+    {
+        Sound.PlayUntilDone(what's up);
+        Sound.PlayUntilDone(Purple Planet Music - Mirrorball (1_58) 140bpm);
+    }
+}
+
+WhenBroadcastReceived(reset game)
+{
+    List.DeleteAll(NewRow.ObstacleData);
+    List.DeleteAll(NewRow.BonusData);
+    row = 0;
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define add row (warp=true)
+{
+    columns = (7 - ((row % 2) == 1));
+    total = (columns + (row * 2));
+    List.DeleteAll(hit distribution);
+    Repeat (columns)
+    {
+        List.Add(hit distribution, 0);
+    }
+    Repeat Until (total == 0)
+    {
+        column = Operator.Random(1 / columns);
+        points = Operator.Random(1 / total);
+        List.ReplaceItem(hit distribution, column, (hit distribution[column] + points));
+        total += ( - points);
+    }
+    index = 1;
+    Repeat (columns)
+    {
+        If ((hit distribution[index] > 0) Or (Operator.Random(0.0 / 1.0) < 0.2))
+        {
+            If (hit distribution[index] > 0)
+            {
+                List.Add(NewRow.ObstacleData, (SCREEN.X.OFFSET + ((22.5 * ((row % 2) == 1)) - ((4 - index) * 45))));
+                List.Add(NewRow.ObstacleData, hit distribution[index]);
+                Control.CreateCloneOf(obstacles);
+            }
+            Else
+            {
+                List.Add(NewRow.BonusData, (SCREEN.X.OFFSET + ((22.5 * ((row % 2) == 1)) - ((4 - index) * 45))));
+                Control.CreateCloneOf(bonuses);
+            }
+        }
+        index += 1;
+    }
+    row += 1;
+}
+
+Define get target (warp=false)
+{
+    Event.Broadcast("update obstacles");
+    Event.Broadcast("update counters");
+    Event.Broadcast("prepare target");
+    Sensing.ResetTimer();
+    counter = -1;
+    pressed? = Sensing.MouseDown();
+    Forever
+    {
+        Event.Broadcast("calculate target velocity");
+        Event.Broadcast("show target");
+        Event.Broadcast("update counters");
+        If (Not (((Sensing.MouseX() > 168) And (Sensing.MouseY() < -150))))
+        {
+            If ((Not (Sensing.MouseDown())) And (pressed? == 1))
+            {
+                If (counter == 0)
+                {
+                    Event.Broadcast("remove target");
+                    Stop(this script);
+                }
+                pressed? = 0;
+            }
+            If (Sensing.MouseDown() And (pressed? == 0))
+            {
+                If (counter == 0)
+                {
+                    Event.Broadcast("remove target");
+                    Stop(this script);
+                }
+                pressed? = 1;
+                counter = 0;
+            }
+        }
+    }
+}
+
+Define play level (warp=false)
+{
+    Event.Broadcast("reset balls");
+    All balls gone? = 0;
+    Repeat Until (All balls gone? == 1)
+    {
+        Pen.Clear();
+        Event.Broadcast("hide effects");
+        Event.Broadcast("update ball");
+        Event.Broadcast("check bonus collisions");
+        Event.Broadcast("update effects");
+        Event.Broadcast("update counters");
+        Event.Broadcast("update hud");
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+background.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+game over.mp3
+Pop.wav
+Purple Planet Music - Mirrorball (1_58) 140bpm.mp3
+what's up.mp3

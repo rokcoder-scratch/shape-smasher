@@ -1,0 +1,209 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone.type = 0
+clone? = 0
+effect.counter = 0
+hits remaining = 0
+obstacle.id = 9
+TYPE.DESTROYED = 2
+TYPE.EFFECT = 1
+TYPE.OBSTACLE = 0
+
+
+//----- Lists ---------------------------------------------------------------------------------------------------------
+
+OBSTACLE.SIZE = { 
+    40
+    30
+    24
+    36
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(hide effects)
+{
+    If ((clone? == 1) And (Not ((clone.type == TYPE.OBSTACLE))))
+    {
+        Looks.Hide();
+    }
+}
+
+WhenBroadcastReceived(initialise)
+{
+    clone? = 0;
+    Looks.Hide();
+    TYPE.OBSTACLE = 0;
+    TYPE.EFFECT = 1;
+    TYPE.DESTROYED = 2;
+    List.DeleteAll(OBSTACLE.SIZE);
+    List.Add(OBSTACLE.SIZE, 40);
+    List.Add(OBSTACLE.SIZE, 30);
+    List.Add(OBSTACLE.SIZE, 24);
+    List.Add(OBSTACLE.SIZE, 36);
+    clone.type = TYPE.OBSTACLE;
+}
+
+WhenBroadcastReceived(raise row by three pixels)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.OBSTACLE)
+        {
+            List.ReplaceItem(Obstacle.y, obstacle.id, (Obstacle.y[obstacle.id] + 3));
+            If ((Obstacle.y[obstacle.id] > 140) And (Obstacle.Hits remaining[obstacle.id] > 0))
+            {
+                If (Game over? == 0)
+                {
+                    Sound.Play(game over);
+                    Game over? = 1;
+                }
+            }
+        }
+    }
+}
+
+WhenBroadcastReceived(remove sprites)
+{
+    Repeat (20)
+    {
+        Looks.ChangeEffectBy(GHOST, 5);
+    }
+    Control.DeleteThisClone();
+}
+
+WhenBroadcastReceived(reset game)
+{
+    List.DeleteAll(Obstacle.x);
+    List.DeleteAll(Obstacle.y);
+    List.DeleteAll(Obstacle.Hits remaining);
+    List.DeleteAll(Obstacle.rotation);
+    List.DeleteAll(Obstacle.scale);
+    List.DeleteAll(Obstacle.type);
+    List.DeleteAll(Obstacle.hit?);
+}
+
+WhenBroadcastReceived(update counters)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.EFFECT)
+        {
+            Looks.ChengeSizeBy(4);
+            Looks.ChangeEffectBy(GHOST, 8);
+            effect.counter += 1;
+            If (effect.counter > 10)
+            {
+                Control.DeleteThisClone();
+            }
+        }
+        Else
+        {
+            If (clone.type == TYPE.DESTROYED)
+            {
+                Looks.ChengeSizeBy(10);
+                Looks.ChangeEffectBy(GHOST, 4);
+                effect.counter += 1;
+                If (effect.counter > 24)
+                {
+                    Control.DeleteThisClone();
+                }
+            }
+        }
+    }
+}
+
+WhenBroadcastReceived(update effects)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.OBSTACLE)
+        {
+            If (Obstacle.hit?[obstacle.id] == 1)
+            {
+                effect.counter = 0;
+                If (Obstacle.Hits remaining[obstacle.id] > 0)
+                {
+                    clone.type = TYPE.EFFECT;
+                    Control.CreateCloneOf(_myself_);
+                    clone.type = TYPE.OBSTACLE;
+                }
+                Else
+                {
+                    Costume.GoToFrontBack(back);
+                    clone.type = TYPE.DESTROYED;
+                }
+                List.ReplaceItem(Obstacle.hit?, obstacle.id, 0);
+            }
+        }
+        Else
+        {
+            Looks.Show();
+        }
+    }
+}
+
+WhenBroadcastReceived(update obstacles)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.OBSTACLE)
+        {
+            Looks.SetSizeTo(1000);
+            Motion.GoToXY(Obstacle.x[obstacle.id], Obstacle.y[obstacle.id]);
+            Looks.SetSizeTo(Obstacle.scale[obstacle.id]);
+        }
+    }
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    If (clone.type == TYPE.OBSTACLE)
+    {
+        Call add obstacle;
+    }
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define add obstacle (warp=true)
+{
+    Looks.ClearGraphicEffects();
+    Looks.SwitchCostumeTo(Operator.Random(1 / 4));
+    Motion.PointInDirection(Operator.Random(1 / 360));
+    Looks.SetSizeTo(1000);
+    Motion.GoToXY(NewRow.ObstacleData[1], -200);
+    hits remaining = NewRow.ObstacleData[2];
+    List.DeleteItem(NewRow.ObstacleData, 1);
+    List.DeleteItem(NewRow.ObstacleData, 1);
+    Looks.SetSizeTo(OBSTACLE.SIZE[Costume.GetNumberName(number)]);
+    Looks.Show();
+    List.Add(Obstacle.Hits remaining, hits remaining);
+    List.Add(Obstacle.x, Motion.XPosition());
+    List.Add(Obstacle.y, Motion.YPosition());
+    List.Add(Obstacle.rotation, Motion.Direction());
+    List.Add(Obstacle.scale, Looks.Size());
+    List.Add(Obstacle.type, Costume.GetNumberName(number));
+    List.Add(Obstacle.hit?, 0);
+    obstacle.id = List.Length(Obstacle.Hits remaining);
+    Looks.SetEffectTo(COLOR, ((Sensing.Of(row, manager) * 67) + (obstacle.id * 7)));
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+circle.svg
+pentagon.svg
+square.svg
+triangle.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

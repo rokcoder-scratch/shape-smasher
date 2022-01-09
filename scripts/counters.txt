@@ -1,0 +1,130 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+counters exist up to index = 54
+digit = 2
+digits = 100
+hits remaining = 
+index = 55
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(initialise)
+{
+    Looks.Hide();
+    Looks.SetSizeTo(40);
+    Looks.SetEffectTo(BRIGHTNESS, -100);
+    clone? = 0;
+}
+
+WhenBroadcastReceived(prepare counters)
+{
+    If (clone? == 0)
+    {
+        Call prepare counters;
+    }
+}
+
+WhenBroadcastReceived(remove sprites)
+{
+    If (clone? == 1)
+    {
+        Repeat (20)
+        {
+            Looks.ChangeEffectBy(GHOST, 5);
+        }
+        Control.DeleteThisClone();
+    }
+}
+
+WhenBroadcastReceived(reset game)
+{
+    counters exist up to index = 0;
+}
+
+WhenBroadcastReceived(update counters)
+{
+    If (clone? == 1)
+    {
+        hits remaining = Obstacle.Hits remaining[index];
+        If (hits remaining == 0)
+        {
+            Control.DeleteThisClone();
+        }
+        If (Variable.Length(hits remaining) < digits)
+        {
+            digits = Variable.Length(hits remaining);
+            If (digit > (digits - 1))
+            {
+                Control.DeleteThisClone();
+            }
+        }
+        Call set position;
+        Looks.SwitchCostumeTo((Operator.LetterOf(hits remaining, (digits - digit)) + 1));
+        Looks.Show();
+    }
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Call set position;
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define prepare counters (warp=true)
+{
+    index = (counters exist up to index + 1);
+    Repeat ((List.Length(Obstacle.Hits remaining) - counters exist up to index))
+    {
+        If (Obstacle.type[index] < 5)
+        {
+            digits = 100;
+            digit = 0;
+            Repeat (Variable.Length(Obstacle.Hits remaining[index]))
+            {
+                Control.CreateCloneOf(_myself_);
+                digit += 1;
+            }
+        }
+        index += 1;
+    }
+    counters exist up to index = List.Length(Obstacle.Hits remaining);
+}
+
+Define set position (warp=true)
+{
+    Motion.SetX((Obstacle.x[index] + ((((Variable.Length(hits remaining) - 1) / 2) - digit) * 6)));
+    Motion.SetY(Obstacle.y[index]);
+}
+
+
+//----- Orphaned blocks -----------------------------------------------------------------------------------------------
+
+nine
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+eight.svg
+five.svg
+four.svg
+nine.svg
+one.svg
+seven.svg
+six.svg
+three.svg
+two.svg
+zero.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

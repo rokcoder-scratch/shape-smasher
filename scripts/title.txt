@@ -1,0 +1,54 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(fade in title)
+{
+    If (clone? == 1)
+    {
+        Repeat (10)
+        {
+            Looks.ChangeEffectBy(GHOST, -10);
+        }
+        Looks.Show();
+    }
+}
+
+WhenBroadcastReceived(fade out title)
+{
+    If (clone? == 1)
+    {
+        Repeat (10)
+        {
+            Looks.ChangeEffectBy(GHOST, 10);
+        }
+        Looks.Hide();
+    }
+}
+
+WhenBroadcastReceived(initialise)
+{
+    Motion.GoToXY(0, 0);
+    Costume.GoToFrontBack(front);
+    Control.CreateCloneOf(_myself_);
+    Looks.Hide();
+    clone? = 0;
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+bs2.png

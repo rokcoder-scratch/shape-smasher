@@ -1,0 +1,449 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+angle = -270
+ball.id = 0
+ball.multiplier = 1
+ball.size = 0
+clone.id = 12
+clone? = 0
+collided? = 0
+counter = 81
+delta = 0.98430321521685
+delta.x = 0
+delta.y = 0
+delta score = 0
+distance = 269.31313701424
+distance.min = 0.98462062488042
+dot product = -6.2213892109261
+GRAVITY = -0.4
+height = 24.8
+id cache = 0
+index = 15
+launched ball count = 11
+launching? = 0
+magnitude = 20.670367519554
+normal.angle = -352
+obstacle.id = 1
+point.x = 115
+point.y = -152.4
+sides = 3
+temp.x = -5.7807235976404
+temp.y = 177.02792417868
+unit.normal.x = 0.9902680687
+unit.normal.y = -0.139173101
+unit.vel.x = -0.57372861465068
+unit.vel.y = -0.8190454668277
+vel.x = 5.3972099471234
+vel.y = -19.327684468471
+velocity = 0
+x = 0
+y = 180
+
+
+//----- Lists ---------------------------------------------------------------------------------------------------------
+
+trail.x = { 
+    -56
+    -56
+}
+trail.y = { 
+    180
+    180
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(initialise)
+{
+    Sound.SetVolumeTo(100);
+    SfxVolume = 100;
+    clone? = 0;
+    GRAVITY = -0.4;
+    Looks.SetSizeTo(50);
+    Looks.Hide();
+    Ball count = 0;
+}
+
+WhenBroadcastReceived(reset balls)
+{
+    Motion.GoToXY(SCREEN.X.OFFSET, 180);
+    clone.id = 1;
+    counter = 0;
+    vel.x = Vel.x;
+    vel.y = Vel.y;
+    launching? = 1;
+    launched ball count = 0;
+}
+
+WhenBroadcastReceived(reset game)
+{
+    Active ball count = 0;
+    Ball count = 1;
+    List.DeleteAll(Ball.multiplier);
+    List.DeleteAll(Ball.size);
+}
+
+WhenBroadcastReceived(sfx off)
+{
+    SfxVolume = 0;
+}
+
+WhenBroadcastReceived(sfx on)
+{
+    SfxVolume = 100;
+}
+
+WhenBroadcastReceived(update ball)
+{
+    If (clone? == 0)
+    {
+        If ((launching? == 1) And ((counter % 6) == 0))
+        {
+            launched ball count += 1;
+            Active ball count += 1;
+            Control.CreateCloneOf(_myself_);
+            clone.id += 1;
+            If (Not ((launched ball count < Ball count)))
+            {
+                launching? = 0;
+            }
+        }
+        counter += 1;
+    }
+    Else
+    {
+        collided? = 0;
+        Call update ball;
+        Call draw trail;
+        If (collided? == 1)
+        {
+            Call calculate obstacle collision;
+        }
+        If Sensing.TouchingObject(bonuses)
+        {
+            Call calculate bonus collision;
+        }
+        If (trail.y[1] < -190)
+        {
+            Active ball count += -1;
+            All balls gone? = (Active ball count == 0);
+            Control.DeleteThisClone();
+        }
+    }
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+    If (clone.id > List.Length(Ball.multiplier))
+    {
+        List.Add(Ball.multiplier, 1);
+        List.Add(Ball.size, 50);
+    }
+    ball.multiplier = Ball.multiplier[clone.id];
+    ball.size = Ball.size[clone.id];
+    Looks.SwitchCostumeTo(Operator.Join("ball", ball.multiplier));
+    Looks.SetSizeTo(ball.size);
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define //TODO(string comment) (warp=true)
+{
+}
+
+Define calculate bonus collision (warp=true)
+{
+    Call //TODO("index 1 may have long gone - should start from the least id that's on the screen");
+    index = 1;
+    ball.id = 0;
+    distance.min = 100000;
+    Repeat (List.Length(Bonus.hit?))
+    {
+        If (Bonus.hits remaining[index] > 0)
+        {
+            delta.x = (Motion.XPosition() - Bonus.x[index]);
+            delta.y = (Motion.YPosition() - Bonus.y[index]);
+            distance = ((delta.x * delta.x) + (delta.y * delta.y));
+            If (distance < distance.min)
+            {
+                ball.id = index;
+                distance.min = distance;
+            }
+        }
+        index += 1;
+    }
+    List.ReplaceItem(Bonus.hit?, ball.id, 1);
+    If ((ball.multiplier == 2) And (Bonus.type[ball.id] == 2))
+    {
+        Stop(this script);
+    }
+    List.ReplaceItem(Bonus.hits remaining, ball.id, 0);
+    If (Bonus.type[ball.id] == 1)
+    {
+        Active ball count += 1;
+        Ball count += 1;
+        x = vel.x;
+        y = vel.y;
+        vel.x = 0;
+        vel.y = 6;
+        id cache = clone.id;
+        clone.id = (List.Length(Ball.multiplier) + 1);
+        Control.CreateCloneOf(_myself_);
+        clone.id = id cache;
+        vel.x = x;
+        vel.y = y;
+    }
+    Else
+    {
+        List.ReplaceItem(Ball.multiplier, clone.id, 2);
+        ball.multiplier = 2;
+        Looks.SwitchCostumeTo(ball2);
+    }
+    If (SfxVolume > 0)
+    {
+        Sound.Play(boop);
+    }
+}
+
+Define calculate bounce velocity(string v.x)(string v.y)(string n.x)(string n.y) (warp=true)
+{
+    dot product = ((v.x * n.x) + (v.y * n.y));
+    vel.x = ((v.x - ((2 * dot product) * n.x)) * 0.6);
+    vel.y = ((v.y - ((2 * dot product) * n.y)) * 0.6);
+    velocity = sqrt(((vel.x * vel.x) + (vel.y * vel.y)));
+    If (velocity < 4)
+    {
+        velocity = (Operator.Random(7.8 / 8.0) / velocity);
+        vel.x = (vel.x * velocity);
+        vel.y = (vel.y * velocity);
+    }
+}
+
+Define calculate collision normal (warp=true)
+{
+    If (Obstacle.type[obstacle.id] == 4)
+    {
+        unit.normal.x = (Motion.XPosition() - Obstacle.x[obstacle.id]);
+        unit.normal.y = (Motion.YPosition() - Obstacle.y[obstacle.id]);
+        magnitude = sqrt(((unit.normal.x * unit.normal.x) + (unit.normal.y * unit.normal.y)));
+        unit.normal.x = (unit.normal.x / magnitude);
+        unit.normal.y = (unit.normal.y / magnitude);
+    }
+    Else
+    {
+        sides = (Obstacle.type[obstacle.id] + 2);
+        height = ((100 - (38 * (sides == 3))) * (Obstacle.scale[obstacle.id] / 100));
+        distance.min = 1000;
+        angle = Obstacle.rotation[obstacle.id];
+        point.x = (Obstacle.x[obstacle.id] + ((( - (Obstacle.scale[obstacle.id] / 2)) * sin(angle)) - (( - (height / 2)) * cos(angle))));
+        point.y = (Obstacle.y[obstacle.id] + ((( - (height / 2)) * sin(angle)) + (( - (Obstacle.scale[obstacle.id] / 2)) * cos(angle))));
+        temp.x = (Motion.XPosition() + (unit.vel.x * 6.5));
+        temp.y = (Motion.YPosition() + (unit.vel.y * 6.5));
+        Repeat (sides)
+        {
+            distance = abs(((sin(angle) * (point.y - temp.y)) - (cos(angle) * (point.x - temp.x))));
+            If (distance < distance.min)
+            {
+                If (((cos(angle) * unit.vel.x) + (( - sin(angle)) * unit.vel.y)) < 0)
+                {
+                    distance.min = distance;
+                    normal.angle = angle;
+                }
+            }
+            point.x += (Obstacle.scale[obstacle.id] * sin(angle));
+            point.y += (Obstacle.scale[obstacle.id] * cos(angle));
+            angle += (-360 / sides);
+        }
+        unit.normal.x = cos(normal.angle);
+        unit.normal.y = ( - sin(normal.angle));
+    }
+}
+
+Define calculate obstacle collision (warp=true)
+{
+    Call find touching;
+    If (SfxVolume > 0)
+    {
+        Sound.Play(click);
+    }
+    Call calculate collision normal;
+    Call calculate bounce velocity(vel.x)(vel.y)(unit.normal.x)(unit.normal.y);
+}
+
+Define draw collision boxs (warp=true)
+{
+    index = 1;
+    x = Motion.XPosition();
+    y = Motion.YPosition();
+    Repeat (List.Length(Obstacle.type))
+    {
+        If (Obstacle.type[index] == 4)
+        {
+        }
+        Else
+        {
+            Pen.SetPenColorToColor(#0cb0ec);
+            Pen.SetPenSizeTo(4);
+            sides = (Obstacle.type[index] + 2);
+            If (sides == 3)
+            {
+                height = (62 * (Obstacle.scale[index] / 100));
+            }
+            Else
+            {
+                If (sides == 4)
+                {
+                    height = (100 * (Obstacle.scale[index] / 100));
+                }
+                Else
+                {
+                    height = (140 * (Obstacle.scale[index] / 100));
+                }
+            }
+            angle = Obstacle.rotation[index];
+            point.x = (Obstacle.x[index] + ((( - (Obstacle.scale[index] / 2)) * sin(angle)) - (( - (height / 2)) * cos(angle))));
+            point.y = (Obstacle.y[index] + ((( - (height / 2)) * sin(angle)) + (( - (Obstacle.scale[index] / 2)) * cos(angle))));
+            temp.x = (Motion.XPosition() + (unit.vel.x * 6.5));
+            temp.y = (Motion.YPosition() + (unit.vel.y * 6.5));
+            Repeat (sides)
+            {
+                Motion.GoToXY(point.x, point.y);
+                Pen.Down();
+                distance = abs(((sin(angle) * (point.y - temp.y)) - (cos(angle) * (point.x - temp.x))));
+                point.x += (Obstacle.scale[index] * sin(angle));
+                point.y += (Obstacle.scale[index] * cos(angle));
+                angle += (-360 / sides);
+            }
+            Motion.GoToXY(point.x, point.y);
+            Pen.Clear();
+        }
+        index += 1;
+    }
+    Looks.SetSizeTo(1000);
+    Motion.GoToXY(x, y);
+    Looks.SetSizeTo(ball.size);
+}
+
+Define draw trail (warp=true)
+{
+    x = Motion.XPosition();
+    y = Motion.YPosition();
+    Looks.SetSizeTo(1000);
+    Pen.SetPenColorToColor(#ffffff);
+    Pen.SetPenSizeTo(10);
+    Pen.SetPenTo(brightness, 90);
+    Pen.Down();
+    index = List.Length(trail.x);
+    Repeat (index)
+    {
+        Motion.GoToXY(((Motion.XPosition() + trail.x[index]) / 2), ((Motion.YPosition() + trail.y[index]) / 2));
+        Pen.ChangePenSizeBy(-1.4);
+        Pen.ChangePenBy(brightness, -8);
+        Motion.GoToXY(trail.x[index], trail.y[index]);
+        Pen.ChangePenSizeBy(-1.4);
+        Pen.ChangePenBy(brightness, -8);
+        index += -1;
+    }
+    Pen.Clear();
+    Motion.GoToXY(x, y);
+    Looks.SetSizeTo(ball.size);
+}
+
+Define find touching (warp=true)
+{
+    Call //TODO("index 1 may have long gone - should start from the least id that's on the screen");
+    index = 1;
+    obstacle.id = 0;
+    distance.min = 100000;
+    Repeat (List.Length(Obstacle.Hits remaining))
+    {
+        If (Obstacle.Hits remaining[index] > 0)
+        {
+            delta.x = (Motion.XPosition() - Obstacle.x[index]);
+            delta.y = (Motion.YPosition() - Obstacle.y[index]);
+            distance = ((delta.x * delta.x) + (delta.y * delta.y));
+            If (distance < distance.min)
+            {
+                obstacle.id = index;
+                distance.min = distance;
+            }
+        }
+        index += 1;
+    }
+    List.ReplaceItem(Obstacle.hit?, obstacle.id, 1);
+    List.ReplaceItem(Obstacle.Hits remaining, obstacle.id, (Obstacle.Hits remaining[obstacle.id] - ball.multiplier));
+    delta score = (ball.multiplier * 5);
+    If (Obstacle.Hits remaining[obstacle.id] < 0)
+    {
+        delta score += (Obstacle.Hits remaining[obstacle.id] * 5);
+        List.ReplaceItem(Obstacle.Hits remaining, obstacle.id, 0);
+    }
+    Score += delta score;
+}
+
+Define update ball (warp=true)
+{
+    If 
+    {
+        Call draw collision boxs;
+    }
+    List.Add(trail.x, Motion.XPosition());
+    List.Add(trail.y, Motion.YPosition());
+    If (List.Length(trail.x) > 3)
+    {
+        List.DeleteItem(trail.x, 1);
+        List.DeleteItem(trail.y, 1);
+    }
+    vel.y += GRAVITY;
+    magnitude = sqrt(((vel.x * vel.x) + (vel.y * vel.y)));
+    unit.vel.x = (vel.x / magnitude);
+    unit.vel.y = (vel.y / magnitude);
+    delta = (magnitude / ceiling(magnitude));
+    Repeat (ceiling(magnitude))
+    {
+        Looks.SetSizeTo(1000);
+        Motion.ChangeXBy((unit.vel.x * delta));
+        Motion.ChangeYBy((unit.vel.y * delta));
+        Looks.SetSizeTo(ball.size);
+        If (abs((Motion.XPosition() - SCREEN.X.OFFSET)) > 160)
+        {
+            Looks.SetSizeTo(1000);
+            Motion.ChangeXBy(( - (unit.vel.x * delta)));
+            Motion.ChangeYBy(( - (unit.vel.y * delta)));
+            Looks.SetSizeTo(ball.size);
+            Call calculate bounce velocity(vel.x)(vel.y)(((((Motion.XPosition() - SCREEN.X.OFFSET) < 0) * 2) - 1))(0);
+            Stop(this script);
+        }
+        Else
+        {
+            If Sensing.TouchingObject(obstacles)
+            {
+                Looks.SetSizeTo(1000);
+                Motion.ChangeXBy(( - (unit.vel.x * delta)));
+                Motion.ChangeYBy(( - (unit.vel.y * delta)));
+                Looks.SetSizeTo(ball.size);
+                collided? = 1;
+                Stop(this script);
+            }
+        }
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+ball1.svg
+ball2.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+boop.mp3
+click.mp3

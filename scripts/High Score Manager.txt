@@ -1,0 +1,382 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+balls = 0
+BALLS LENGTH = 3
+characters = abcdefghijklmnopqrstuvwxyz0123456789-_
+cloud active? = true
+highscores = 01210409151920011802121831351930761301192005181605200500162435182072182814061008192928273015516017806811180902121500000000001206001560580207220911091407192735117005153051130118110401141515020010395014406106180114032507011305191014901440570122182830273500000000100620143057071518370405050000000010026014405306050436353433323130290984101420561325381903180120030838096020139064081515020920250715150209427513906016011609162116051601160936851380460411231219231123080100093095138066011908020920380000000009073500000020080538021221053810000883601360541612012025382005192000088015133056011409021509040107180508660013305302011820051111011925140865651330551401200801140509140700086140132065181502152003080903110508532013306203180505200518282930000841801300481015151514010000000000081820131058030801201514251201140708141013004437192116051806211414250805851280530914061513051803090112079395127051070520380805121600000007714512605019120913051005121225360757701230590308151303081516342829075420124054030118192827272927000007127012005927270709180900000000000711301200502005141416211801210415070800120045261612111800000000000006986512004630273128312800000000000691801190512309040412380113012005069160119047180122051438091205250106912511904814051115130118153714110684751180502019122103011903000000066870116049061809202628320000000006662011705706191927282730340000000664251180551309202005141902181520066075116055161815383036330000000006570011604716091215203820151920250642851150501108150914072125051427064280116052082113011403011203340006409011405109132119200801220537200638750000000301160920011403011105063725114046120920201205371101230106368011403603180126253811210112010636401140430503153320231500000000063540000000
+i = 0
+index = 1701
+name = eco6two
+NAME LENGTH = 11
+rows = 0
+ROWS LENGTH = 3
+score = 63540
+score index = 51
+SCORE LENGTH = 6
+segment = 
+VERSION = 1
+
+
+//----- Lists ---------------------------------------------------------------------------------------------------------
+
+backup scores = { 
+    0119080209203800000000907351601160916211605160116683000913211920080122053720638750503153320231500000000635400114090215090401071805617901815110315040518000000589302018232732313636363600509650315040914071821120519504801315091905191801012934481600301200119201
+    8151608094788537200805051609030519204696516181506051919091514014573519211605181921191925014404523091414090528362733004381019130112121415190513014380505121201380114140138344380007151837040505000000004306501133816181538031504054289511180902121500000000004267
+    0031503151421200701201542250192005011615012000000041770180504381409141001190041700130118091513011920051840980020114011401230500000040610200805161201140507212539350031512091413010303000038980040914151805242827000038690162116162516152305183038395080112062003
+    0800000000381750121040915192001180212381600520080114362836283300377401701262829303823192431376951115200805260000000000375052625031809142009240000372300319283631333434330000361201609100114253807090514355402829300303150405180000348951605140721091413011105344
+    0020080505241605182016183431515130507013804180505133412522052013011428000000003314010050516150606181501043268520151813010714050000003264511051919051238182114003253004212209143816151105133217520080515283232330000003145524051823091424161200003142501260828363
+    1000000000030525200111051415111520152130370041801030118130914000030100
+    0
+    0
+}
+characters = { 
+    a
+    b
+    c
+    d
+    e
+    f
+    g
+    h
+    i
+    j
+    k
+    l
+    m
+    n
+    o
+    p
+    q
+    r
+    s
+    t
+    u
+    v
+    w
+    x
+    y
+    z
+    0
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    -
+    _
+}
+high score segments = { 
+    0119080209203800000000090735000000160116091621160516011606830000000009132119200801220537200638750000000503153320231500000000063540000000011409021509040107180506179000000018151103150405180000000589300000002018232732313636363600050965000000031504091407182112
+    0519050480000000131509190519180101293404816000000003012001192018151608090478850000003720080505160903051920046965000000161815060519190915140104573500000019211605181921191925010440450000002309141409052836273300043810000000191301121214151905130104380500000005
+    1212013801141401383404380000000007151837040505000000000430650000000113381618153803150405042895000000111809021215000000000004267000000003150315142120070120150422500000001920050116150120000000041770000000180504381409141001190004170000000013011809151301192005
+    1804098000000002011401140123050000000406100000002008051612011405072125039350000000031512091413010303000003898000000004091415180524282700000386900000001621161625161523051830038395000000080112062003080000000003817500000001210409151920011802120381600000000520
+    0801143628362833000377400000001701262829303823192431037695000000111520080526000000000003750500000026250318091420092400000372300000000319283631333434330000036120000000160910011425380709051403554000000028293003031504051800000348950000001605140721091413011105
+    0344000000002008050524160518201618034315000000151305070138041805051303412500000022052013011428000000000331400000001005051615060618150104032685000000201518130107140500000003264500000011051919051238182114000325300000000421220914381615110513032175000000200805
+    15283232330000000314550000002405182309142416120000031425000000012608283631000000000003052500000020011105141511152015210303700000000418010301181309140000030100000000
+    
+    
+    
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(High Scores Read)
+{
+    Call version check;
+    Call Read Highscores;
+}
+
+WhenBroadcastReceived(High Scores Write)
+{
+    If (cloud active? == "true")
+    {
+        Call version check;
+        Call write highscores;
+    }
+}
+
+WhenBroadcastReceived(initialise)
+{
+    Looks.Hide();
+    NAME LENGTH = 11;
+    SCORE LENGTH = 6;
+    BALLS LENGTH = 3;
+    ROWS LENGTH = 3;
+    VERSION = 1;
+    Call version check;
+    Call Initialise;
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define Encode Highscores (warp=true)
+{
+    List.DeleteAll(high score segments);
+    score index = 1;
+    highscores = "";
+    Repeat (50)
+    {
+        i = 1;
+        Repeat (NAME LENGTH)
+        {
+            If (i > Variable.Length(Highscore.Name[score index]))
+            {
+                highscores = Operator.Join(highscores, 00);
+            }
+            Else
+            {
+                index = List.IndexOf(characters, Operator.LetterOf(Highscore.Name[score index], i));
+                If (index < 10)
+                {
+                    highscores = Operator.Join(highscores, Operator.Join(0, index));
+                }
+                Else
+                {
+                    highscores = Operator.Join(highscores, index);
+                }
+            }
+            i += 1;
+        }
+        score = Highscore.Score[score index];
+        Repeat Until (Not ((Variable.Length(score) < SCORE LENGTH)))
+        {
+            score = Operator.Join(0, score);
+        }
+        index = 1;
+        Repeat (SCORE LENGTH)
+        {
+            highscores = Operator.Join(highscores, Operator.LetterOf(score, index));
+            index += 1;
+        }
+        rows = Highscore.Row[score index];
+        Repeat Until (Not ((Variable.Length(rows) < ROWS LENGTH)))
+        {
+            rows = Operator.Join(0, rows);
+        }
+        index = 1;
+        Repeat (ROWS LENGTH)
+        {
+            highscores = Operator.Join(highscores, Operator.LetterOf(rows, index));
+            index += 1;
+        }
+        balls = Highscore.Ball[score index];
+        Repeat Until (Not ((Variable.Length(balls) < BALLS LENGTH)))
+        {
+            balls = Operator.Join(0, balls);
+        }
+        index = 1;
+        Repeat (BALLS LENGTH)
+        {
+            highscores = Operator.Join(highscores, Operator.LetterOf(balls, index));
+            index += 1;
+        }
+        score index += 1;
+    }
+    index = 1;
+    Repeat (10)
+    {
+        segment = "";
+        Repeat (256)
+        {
+            If (Not ((index > Variable.Length(highscores))))
+            {
+                segment = Operator.Join(segment, Operator.LetterOf(highscores, index));
+            }
+            index += 1;
+        }
+        List.Add(high score segments, segment);
+    }
+}
+
+Define Initialise (warp=true)
+{
+    characters = "abcdefghijklmnopqrstuvwxyz0123456789-_";
+    List.DeleteAll(characters);
+    index = 1;
+    Repeat (Variable.Length(characters))
+    {
+        List.Add(characters, Operator.LetterOf(characters, index));
+        index += 1;
+    }
+    List.DeleteAll(Highscore.Name);
+    List.DeleteAll(Highscore.Score);
+    List.DeleteAll(Highscore.Row);
+    List.DeleteAll(Highscore.Ball);
+    Repeat (50)
+    {
+        List.Add(Highscore.Name, "-rokcoder-");
+        List.Add(Highscore.Score, 0);
+        List.Add(Highscore.Row, 0);
+        List.Add(Highscore.Ball, 0);
+    }
+    cloud active? = "false";
+}
+
+Define Read Highscores (warp=true)
+{
+    highscores = Operator.Join(☁ yucky asparagus - 0, Operator.Join(☁ yucky asparagus - 1, Operator.Join(☁ yucky asparagus - 2, Operator.Join(☁ yucky asparagus - 3, Operator.Join(☁ yucky asparagus - 4, Operator.Join(☁ yucky asparagus - 5, ☁ yucky asparagus - 6))))));
+    If (Not ((highscores == "")))
+    {
+        cloud active? = "true";
+        score index = 1;
+        index = 1;
+        Repeat (50)
+        {
+            name = "";
+            Repeat (NAME LENGTH)
+            {
+                i = floor(Operator.Join(Operator.LetterOf(highscores, index), Operator.LetterOf(highscores, (index + 1))));
+                If (i > 0)
+                {
+                    name = Operator.Join(name, characters[i]);
+                }
+                index += 2;
+            }
+            score = 0;
+            Repeat (SCORE LENGTH)
+            {
+                score = ((score * 10) + Operator.LetterOf(highscores, index));
+                index += 1;
+            }
+            rows = 0;
+            Repeat (ROWS LENGTH)
+            {
+                rows = ((rows * 10) + Operator.LetterOf(highscores, index));
+                index += 1;
+            }
+            balls = 0;
+            Repeat (BALLS LENGTH)
+            {
+                balls = ((balls * 10) + Operator.LetterOf(highscores, index));
+                index += 1;
+            }
+            List.ReplaceItem(Highscore.Name, score index, name);
+            List.ReplaceItem(Highscore.Score, score index, score);
+            List.ReplaceItem(Highscore.Row, score index, rows);
+            List.ReplaceItem(Highscore.Ball, score index, balls);
+            score index += 1;
+        }
+    }
+}
+
+Define version check (warp=false)
+{
+    If (Not ((VERSION == ☁ horrid celery)))
+    {
+        Control.Wait(0);
+        Costume.GoToFrontBack(front);
+        Looks.Show();
+        Stop(all);
+    }
+}
+
+Define write highscores (warp=false)
+{
+    Call Encode Highscores;
+    ☁ yucky asparagus - 0 = high score segments[1];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 1 = high score segments[2];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 2 = high score segments[3];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 3 = high score segments[4];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 4 = high score segments[5];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 5 = high score segments[6];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 6 = high score segments[7];
+}
+
+
+//----- Orphaned blocks -----------------------------------------------------------------------------------------------
+
+name length
+
+score length
+
+name length
+
+score length
+
+If (Sensing.Username() == "RokCoder")
+{
+    Call Initialise;
+    cloud active? = "true";
+    Event.BroadcastAndWait("High Scores Write");
+    cloud active? = "false";
+}
+
+If (Sensing.Username() == "RokCoder")
+{
+    NAME LENGTH = 11;
+    SCORE LENGTH = 5;
+    BALLS LENGTH = 0;
+    ROWS LENGTH = 0;
+    Call Initialise;
+    Call Read Highscores;
+    ☁ yucky asparagus - 0 = backup scores[1];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 1 = backup scores[2];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 2 = backup scores[3];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 3 = backup scores[4];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 4 = backup scores[5];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 5 = backup scores[6];
+    Control.Wait(0.15);
+    ☁ yucky asparagus - 6 = backup scores[7];
+    Control.Wait(0.15);
+    If 
+    {
+        ☁ horrid celery = backup scores[8];
+    }
+}
+
+If (Sensing.Username() == "RokCoder")
+{
+    List.DeleteAll(backup scores);
+    List.Add(backup scores, ☁ yucky asparagus - 0);
+    List.Add(backup scores, ☁ yucky asparagus - 1);
+    List.Add(backup scores, ☁ yucky asparagus - 2);
+    List.Add(backup scores, ☁ yucky asparagus - 3);
+    List.Add(backup scores, ☁ yucky asparagus - 4);
+    List.Add(backup scores, ☁ yucky asparagus - 5);
+    List.Add(backup scores, ☁ yucky asparagus - 6);
+    List.Add(backup scores, ☁ horrid celery);
+}
+
+If (Sensing.Username() == "RokCoder")
+{
+    Call Initialise;
+    NAME LENGTH = 11;
+    SCORE LENGTH = 5;
+    BALLS LENGTH = 0;
+    ROWS LENGTH = 0;
+    Call Read Highscores;
+    NAME LENGTH = 11;
+    SCORE LENGTH = 6;
+    BALLS LENGTH = 3;
+    ROWS LENGTH = 3;
+    Call write highscores;
+    ☁ horrid celery = 1;
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+upgrade.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

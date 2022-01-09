@@ -1,0 +1,127 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone.id = 4
+clone.name = balls
+clone? = 0
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(initialise)
+{
+    Looks.Hide();
+    Looks.SetSizeTo(40);
+    clone? = 0;
+    Call initialise;
+}
+
+WhenBroadcastReceived(reset game)
+{
+}
+
+WhenBroadcastReceived(update hud)
+{
+    If (clone? == 1)
+    {
+        If (clone.name == "score")
+        {
+            Call display number(Score) character position(clone.id) with digit count(6) and padding((Not ()));
+        }
+        Else
+        {
+            If (clone.name == "rows")
+            {
+                Call display number(Sensing.Of(row, manager)) character position(clone.id) with digit count(3) and padding();
+            }
+            Else
+            {
+                Call display number(Ball count) character position(clone.id) with digit count(3) and padding();
+            }
+        }
+    }
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define display number(string number) character position(string pos) with digit count(string digits) and padding(bool padding) (warp=false)
+{
+    Costume.GoToFrontBack(front);
+    If (pos > (digits - Variable.Length(number)))
+    {
+        Looks.Show();
+        Looks.SwitchCostumeTo((Operator.LetterOf(number, (pos - (digits - Variable.Length(number)))) + 1));
+    }
+    Else
+    {
+        If padding
+        {
+            Looks.Show();
+            Looks.SwitchCostumeTo(zero);
+        }
+        Else
+        {
+            Looks.Hide();
+        }
+    }
+}
+
+Define initialise (warp=true)
+{
+    Looks.SetSizeTo(100);
+    clone.name = "score";
+    clone.id = 1;
+    Motion.GoToXY(133, 36);
+    Repeat (6)
+    {
+        Control.CreateCloneOf(_myself_);
+        clone.id += 1;
+        Motion.ChangeXBy(17);
+    }
+    clone.name = "rows";
+    clone.id = 1;
+    Motion.GoToXY(159, -54);
+    Repeat (3)
+    {
+        Control.CreateCloneOf(_myself_);
+        clone.id += 1;
+        Motion.ChangeXBy(17);
+    }
+    clone.name = "balls";
+    clone.id = 1;
+    Motion.GoToXY(159, -114);
+    Repeat (3)
+    {
+        Control.CreateCloneOf(_myself_);
+        clone.id += 1;
+        Motion.ChangeXBy(17);
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+eight.svg
+five.svg
+four.svg
+nine.svg
+one.svg
+seven.svg
+six.svg
+three.svg
+two.svg
+zero.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav
