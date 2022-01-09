@@ -32,6 +32,7 @@ WhenBroadcastReceived(initialise)
     BONUS.+1 BALL = 1;
     BONUS.x2 DAMAGE = 2;
     BONUS.POWER UP = 3;
+    BONUS.GROW = 4;
 }
 
 WhenBroadcastReceived(raise row by three pixels)
@@ -143,9 +144,9 @@ WhenBroadcastReceived(update objects appearence)
             }
             Else
             {
+                Looks.SetSizeTo((BONUS.SIZE + (4 * cos(((167 * bonus.id) + (Sensing.Timer() * 200))))));
                 If (Costume.GetNumberName(number) == BONUS.POWER UP)
                 {
-                    Looks.SetSizeTo((BONUS.SIZE + (4 * cos(((29 * bonus.id) + (Sensing.Timer() * 200))))));
                     Motion.TurnRight(1);
                 }
             }
@@ -171,7 +172,7 @@ Control.WhenIStartAsClone()
 Define add obstacle (warp=true)
 {
     Looks.ClearGraphicEffects();
-    Looks.SwitchCostumeTo(Operator.Random(1 / 3));
+    Looks.SwitchCostumeTo(Operator.Random(1 / 4));
     Motion.PointInDirection(90);
     Looks.SetSizeTo(1000);
     Motion.GoToXY(NewRow.BonusData[1], -200);
@@ -190,6 +191,7 @@ Define add obstacle (warp=true)
 //----- Costumes ------------------------------------------------------------------------------------------------------
 
 +1 ball.svg
+grow.svg
 power.svg
 x2 damage.svg
 
