@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
 rem - HIGHLY RECOMMENDED: See readme.md for full instructions and details
