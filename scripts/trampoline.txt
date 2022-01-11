@@ -1,0 +1,62 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+dir = 0
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(initialise)
+{
+    Looks.SetEffectTo(GHOST, 100);
+    Looks.Hide();
+    clone? = 0;
+}
+
+WhenBroadcastReceived(remove trampoline)
+{
+    If (clone? == 1)
+    {
+        Looks.ChangeEffectBy(GHOST, 10);
+    }
+    Control.DeleteThisClone();
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Motion.GoToXY(SCREEN.X.OFFSET, -176);
+    Costume.GoToFrontBack(front);
+    Looks.Show();
+    dir = 6;
+    Forever
+    {
+        Motion.ChangeXBy(dir);
+        If ((Motion.XPosition() < -160) Or (Motion.XPosition() > 52))
+        {
+            dir = ( - dir);
+        }
+    }
+}
+
+Control.WhenIStartAsClone()
+{
+    Repeat (10)
+    {
+        Looks.ChangeEffectBy(GHOST, -10);
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+costume1.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

@@ -2,24 +2,25 @@
 
 clone? = 0
 column = 2
-columns = 6
-counter = 0
-index = 7
-points = 1
-pressed? = 1
-row = 16
+columns = 7
+counter = -1
+index = 8
+points = 2
+pressed? = 
+row = 1
 total = 0
 
 
 //----- Lists ---------------------------------------------------------------------------------------------------------
 
 hit distribution = { 
-    11
-    9
     0
-    11
-    3
     2
+    3
+    0
+    0
+    2
+    0
 }
 
 
@@ -52,18 +53,24 @@ WhenGreenFlagClicked()
         Repeat Until (Game over? == 1)
         {
             Event.BroadcastAndWait("prepare counters");
-            Repeat (15)
+            If (Sensing.Of(freeze activated?, activatables) == 0)
             {
-                Event.Broadcast("raise row by three pixels");
-                Event.Broadcast("update object positions");
-                Event.Broadcast("update objects appearence");
+                Call scroll on new row;
             }
+            Else
+            {
+                Call judder new row;
+            }
+            Event.Broadcast("reset activatables");
             If (Game over? == 0)
             {
                 Event.Broadcast("update hud");
                 Call get target;
                 Call play level;
-                Call add row;
+                If (Sensing.Of(freeze activated?, activatables) == 0)
+                {
+                    Call add row;
+                }
             }
         }
         Event.Broadcast("fade in title");
@@ -191,10 +198,37 @@ Define get target (warp=false)
     }
 }
 
+Define judder new row (warp=false)
+{
+    Event.Broadcast("shake padlock");
+    Repeat (16)
+    {
+        Event.Broadcast("raise row by three pixels");
+        Event.Broadcast("update object positions");
+        Event.Broadcast("update objects appearence");
+        Control.Wait(0);
+        Event.Broadcast("drop by 3 pixels");
+        Event.Broadcast("update object positions");
+        Event.Broadcast("update objects appearence");
+    }
+    Event.Broadcast("remove padlock");
+}
+
 Define play level (warp=false)
 {
     Event.Broadcast("reset balls");
     All balls gone? = 0;
+    If (Sensing.Of(trampoline activated?, activatables) == 1)
+    {
+        Control.CreateCloneOf(trampoline);
+    }
+    Else
+    {
+        If (Sensing.Of(freeze activated?, activatables) == 1)
+        {
+            Control.CreateCloneOf(padlock);
+        }
+    }
     Repeat Until (All balls gone? == 1)
     {
         Pen.Clear();
@@ -203,6 +237,17 @@ Define play level (warp=false)
         Event.Broadcast("update hits on objects");
         Event.Broadcast("update objects appearence");
         Event.Broadcast("update hud");
+    }
+    Event.Broadcast("remove trampoline");
+}
+
+Define scroll on new row (warp=false)
+{
+    Repeat (15)
+    {
+        Event.Broadcast("raise row by three pixels");
+        Event.Broadcast("update object positions");
+        Event.Broadcast("update objects appearence");
     }
 }
 

@@ -22,6 +22,17 @@ OBSTACLE.SIZE = {
 
 //----- Broadcast received events -------------------------------------------------------------------------------------
 
+WhenBroadcastReceived(drop by 3 pixels)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.OBSTACLE)
+        {
+            List.ReplaceItem(Obstacle.y, obstacle.id, (Obstacle.y[obstacle.id] + -3));
+        }
+    }
+}
+
 WhenBroadcastReceived(hide effects)
 {
     If ((clone? == 1) And (Not ((clone.type == TYPE.OBSTACLE))))

@@ -5,6 +5,7 @@ BONUS.SIZE = 60
 clone.type = 0
 clone? = 0
 effect.counter = 0
+size cache = 0
 TYPE.BONUS = 0
 TYPE.DESTROYED = 2
 TYPE.EFFECT = 1
@@ -12,6 +13,17 @@ TYPE.EFFECT = 1
 
 
 //----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(drop by 3 pixels)
+{
+    If (clone? == 1)
+    {
+        If (clone.type == TYPE.BONUS)
+        {
+            List.ReplaceItem(Bonus.y, bonus.id, (Bonus.y[bonus.id] + -3));
+        }
+    }
+}
 
 WhenBroadcastReceived(hide effects)
 {
@@ -30,9 +42,10 @@ WhenBroadcastReceived(initialise)
     TYPE.DESTROYED = 2;
     BONUS.SIZE = 60;
     BONUS.+1 BALL = 1;
-    BONUS.x2 DAMAGE = 2;
-    BONUS.POWER UP = 3;
-    BONUS.GROW = 4;
+    BONUS.+2 BALL = 2;
+    BONUS.x2 DAMAGE = 3;
+    BONUS.POWER UP = 4;
+    BONUS.GROW = 5;
 }
 
 WhenBroadcastReceived(raise row by three pixels)
@@ -100,9 +113,10 @@ WhenBroadcastReceived(update object positions)
     {
         If (clone.type == TYPE.BONUS)
         {
+            size cache = Looks.Size();
             Looks.SetSizeTo(1000);
             Motion.GoToXY(Bonus.x[bonus.id], Bonus.y[bonus.id]);
-            Looks.SetSizeTo(BONUS.SIZE);
+            Looks.SetSizeTo(size cache);
             If (Bonus.y[bonus.id] > 115)
             {
                 Looks.SetEffectTo(GHOST, ((Bonus.y[bonus.id] - 115) * 2.5));
@@ -172,7 +186,7 @@ Control.WhenIStartAsClone()
 Define add obstacle (warp=true)
 {
     Looks.ClearGraphicEffects();
-    Looks.SwitchCostumeTo(Operator.Random(1 / 4));
+    Looks.SwitchCostumeTo(Operator.Random(1 / 5));
     Motion.PointInDirection(90);
     Looks.SetSizeTo(1000);
     Motion.GoToXY(NewRow.BonusData[1], -200);
@@ -191,6 +205,7 @@ Define add obstacle (warp=true)
 //----- Costumes ------------------------------------------------------------------------------------------------------
 
 +1 ball.svg
++2 ball.svg
 grow.svg
 power.svg
 x2 damage.svg

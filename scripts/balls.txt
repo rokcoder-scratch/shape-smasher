@@ -3,15 +3,15 @@
 angle = -270
 ball.id = 0
 ball.multiplier = 1
-ball.size = 0
-clone.id = 5
+ball.size = 3
+clone.id = 8
 clone? = 0
 collided? = 0
-counter = 228
-delta = 0.98430321521685
+counter = 102
+damage = 0
+delta = 0.97220017082316
 delta.x = 0
 delta.y = 0
-delta score = 0
 distance = 269.31313701424
 distance.min = 0.98462062488042
 dot product = -6.2213892109261
@@ -19,22 +19,23 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 4
+launched ball count = 7
 launching? = 0
-magnitude = 20.670367519554
+magnitude = 20.416203587286
 normal.angle = -352
 obstacle.id = 1
 point.x = 115
 point.y = -152.4
+scale = 3
 sides = 3
 temp.x = -5.7807235976404
 temp.y = 177.02792417868
 unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
-unit.vel.x = -0.57372861465068
-unit.vel.y = -0.8190454668277
-vel.x = 11.555922483438
-vel.y = -16.720594423169
+unit.vel.x = 0.14735872647523
+unit.vel.y = -0.98908311366214
+vel.x = -2.8833861917375
+vel.y = -19.81022888622
 velocity = 0
 x = 0
 y = 180
@@ -45,8 +46,10 @@ y = 180
 trail.x = { 
     -56
     -56
+    -56
 }
 trail.y = { 
+    180
     180
     180
 }
@@ -104,7 +107,7 @@ WhenBroadcastReceived(update ball)
             Active ball count += 1;
             Control.CreateCloneOf(_myself_);
             clone.id += 1;
-            If (Not ((launched ball count < Ball count)))
+            If (Not ((launched ball count < (Ball count + (Sensing.Of(multiball activated?, activatables) * 20)))))
             {
                 launching? = 0;
             }
@@ -147,8 +150,30 @@ Control.WhenIStartAsClone()
     }
     ball.multiplier = Ball.multiplier[clone.id];
     ball.size = Ball.size[clone.id];
-    Looks.SwitchCostumeTo(Operator.Join("ball", ball.multiplier));
-    Looks.SetSizeTo((ball.size * 15));
+    If (Sensing.Of(fire activated?, activatables) == 1)
+    {
+        Looks.SwitchCostumeTo(fireball);
+    }
+    Else
+    {
+        If (Sensing.Of(quad-damage activated?, activatables) == 1)
+        {
+            Looks.SwitchCostumeTo(quad);
+        }
+        Else
+        {
+            Looks.SwitchCostumeTo(Operator.Join("ball", ball.multiplier));
+        }
+    }
+    If (Sensing.Of(growth activated?, activatables) == 0)
+    {
+        scale = ball.size;
+    }
+    Else
+    {
+        scale = 6;
+    }
+    Looks.SetSizeTo((scale * 15));
 }
 
 
@@ -158,14 +183,14 @@ Define //TODO(string comment) (warp=true)
 {
 }
 
-Define bonus +1 ball (warp=true)
+Define add ball at angle(string angle) (warp=true)
 {
     Active ball count += 1;
     Ball count += 1;
     x = vel.x;
     y = vel.y;
-    vel.x = 0;
-    vel.y = 6;
+    vel.x = (6 * sin(angle));
+    vel.y = (6 * cos(angle));
     id cache = clone.id;
     clone.id = (List.Length(Ball.multiplier) + 1);
     Control.CreateCloneOf(_myself_);
@@ -174,10 +199,29 @@ Define bonus +1 ball (warp=true)
     vel.y = y;
 }
 
+Define bonus +1 ball (warp=true)
+{
+    Call add ball at angle(0);
+}
+
+Define bonus +2 ball (warp=true)
+{
+    Call add ball at angle(-30);
+    Call add ball at angle(30);
+}
+
 Define bonus grow (warp=true)
 {
     ball.size = 4;
     List.ReplaceItem(Ball.size, clone.id, ball.size);
+    If (Sensing.Of(growth activated?, activatables) == 0)
+    {
+        scale = ball.size;
+    }
+    Else
+    {
+        scale = 6;
+    }
 }
 
 Define bonus power up (warp=true)
@@ -188,7 +232,10 @@ Define bonus x2 damage (warp=true)
 {
     ball.multiplier = 2;
     List.ReplaceItem(Ball.multiplier, clone.id, ball.multiplier);
-    Looks.SwitchCostumeTo(Operator.Join("ball", ball.multiplier));
+    If ((Sensing.Of(fire activated?, activatables) == 0) And (Sensing.Of(quad-damage activated?, activatables) == 0))
+    {
+        Looks.SwitchCostumeTo(Operator.Join("ball", ball.multiplier));
+    }
 }
 
 Define calculate bonus collision (warp=true)
@@ -228,26 +275,37 @@ Define calculate bonus collision (warp=true)
     }
     Else
     {
-        If (Bonus.type[ball.id] == BONUS.x2 DAMAGE)
+        If (Bonus.type[ball.id] == BONUS.+2 BALL)
         {
-            Call bonus x2 damage;
+            Call bonus +2 ball;
         }
         Else
         {
-            If (Bonus.type[ball.id] == BONUS.POWER UP)
+            If (Bonus.type[ball.id] == BONUS.x2 DAMAGE)
             {
-                Call bonus power up;
+                Call bonus x2 damage;
             }
             Else
             {
-                If (Bonus.type[ball.id] == BONUS.GROW)
+                If (Bonus.type[ball.id] == BONUS.POWER UP)
                 {
-                    Call bonus grow;
+                    Call bonus power up;
                 }
                 Else
                 {
+                    If (Bonus.type[ball.id] == BONUS.GROW)
+                    {
+                        Call bonus grow;
+                    }
+                    Else
+                    {
+                    }
                 }
             }
+        }
+        If (SfxVolume > 0)
+        {
+            Sound.Play(boop);
         }
     }
     If (SfxVolume > 0)
@@ -262,12 +320,6 @@ Define calculate bounce velocity(string v.x)(string v.y)(string n.x)(string n.y)
     vel.x = ((v.x - ((2 * dot product) * n.x)) * 0.6);
     vel.y = ((v.y - ((2 * dot product) * n.y)) * 0.6);
     velocity = sqrt(((vel.x * vel.x) + (vel.y * vel.y)));
-    If (velocity < 4)
-    {
-        velocity = (Operator.Random(7.8 / 8.0) / velocity);
-        vel.x = (vel.x * velocity);
-        vel.y = (vel.y * velocity);
-    }
 }
 
 Define calculate collision normal (warp=true)
@@ -319,6 +371,7 @@ Define calculate obstacle collision (warp=true)
     }
     Call calculate collision normal;
     Call calculate bounce velocity(vel.x)(vel.y)(unit.normal.x)(unit.normal.y);
+    Call maintain minimum ball speed;
 }
 
 Define draw collision boxs (warp=true)
@@ -372,7 +425,7 @@ Define draw collision boxs (warp=true)
     }
     Looks.SetSizeTo(1000);
     Motion.GoToXY(x, y);
-    Looks.SetSizeTo((ball.size * 20));
+    Looks.SetSizeTo((scale * 15));
 }
 
 Define draw trail (warp=true)
@@ -380,24 +433,31 @@ Define draw trail (warp=true)
     x = Motion.XPosition();
     y = Motion.YPosition();
     Looks.SetSizeTo(1000);
-    Pen.SetPenColorToColor(#ffffff);
-    Pen.SetPenSizeTo((3 * ball.size));
+    If (Sensing.Of(fire activated?, activatables) == 1)
+    {
+        Pen.SetPenColorToColor(#ff8c0a);
+    }
+    Else
+    {
+        Pen.SetPenColorToColor(#ffffff);
+    }
+    Pen.SetPenSizeTo((3 * scale));
     Pen.SetPenTo(brightness, 90);
     Pen.Down();
     index = List.Length(trail.x);
     Repeat (index)
     {
         Motion.GoToXY(((Motion.XPosition() + trail.x[index]) / 2), ((Motion.YPosition() + trail.y[index]) / 2));
-        Pen.ChangePenSizeBy((-0.42 * ball.size));
+        Pen.ChangePenSizeBy((-0.42 * scale));
         Pen.ChangePenBy(brightness, -8);
         Motion.GoToXY(trail.x[index], trail.y[index]);
-        Pen.ChangePenSizeBy((-0.42 * ball.size));
+        Pen.ChangePenSizeBy((-0.42 * scale));
         Pen.ChangePenBy(brightness, -8);
         index += -1;
     }
     Pen.Clear();
     Motion.GoToXY(x, y);
-    Looks.SetSizeTo((ball.size * 15));
+    Looks.SetSizeTo((scale * 15));
 }
 
 Define find touching (warp=true)
@@ -422,14 +482,44 @@ Define find touching (warp=true)
         index += 1;
     }
     List.ReplaceItem(Obstacle.hit?, obstacle.id, 1);
-    List.ReplaceItem(Obstacle.Hits remaining, obstacle.id, (Obstacle.Hits remaining[obstacle.id] - ball.multiplier));
-    delta score = (ball.multiplier * 5);
-    If (Obstacle.Hits remaining[obstacle.id] < 0)
+    If (Sensing.Of(fire activated?, activatables) == 1)
     {
-        delta score += (Obstacle.Hits remaining[obstacle.id] * 5);
-        List.ReplaceItem(Obstacle.Hits remaining, obstacle.id, 0);
+        damage = Obstacle.Hits remaining[obstacle.id];
     }
-    Score += delta score;
+    Else
+    {
+        If (Sensing.Of(quad-damage activated?, activatables) == 1)
+        {
+            damage = 4;
+        }
+        Else
+        {
+            damage = ball.multiplier;
+        }
+    }
+    If (Obstacle.Hits remaining[obstacle.id] < damage)
+    {
+        damage = Obstacle.Hits remaining[obstacle.id];
+    }
+    List.ReplaceItem(Obstacle.Hits remaining, obstacle.id, (Obstacle.Hits remaining[obstacle.id] - damage));
+    Score += (damage * 5);
+}
+
+Define maintain minimum ball speed (warp=true)
+{
+    If (velocity < 4)
+    {
+        velocity = (Operator.Random(7.8 / 8.0) / velocity);
+        vel.x = (vel.x * velocity);
+        vel.y = (vel.y * velocity);
+    }
+}
+
+Define maintain minimum trampoline speed (warp=true)
+{
+    velocity = (Operator.Random(10.0 / 16.0) / velocity);
+    vel.x = (vel.x * velocity);
+    vel.y = (vel.y * velocity);
 }
 
 Define update ball (warp=true)
@@ -455,13 +545,26 @@ Define update ball (warp=true)
         Looks.SetSizeTo(1000);
         Motion.ChangeXBy((unit.vel.x * delta));
         Motion.ChangeYBy((unit.vel.y * delta));
-        Looks.SetSizeTo((ball.size * 15));
+        Looks.SetSizeTo((scale * 15));
+        If Sensing.TouchingObject(trampoline)
+        {
+            Repeat Until (Not (Sensing.TouchingObject(trampoline)))
+            {
+                Looks.SetSizeTo(1000);
+                Motion.ChangeXBy(( - (unit.vel.x * delta)));
+                Motion.ChangeYBy(( - (unit.vel.y * delta)));
+                Looks.SetSizeTo((scale * 15));
+            }
+            Call calculate bounce velocity(vel.x)(vel.y)(0)(1);
+            Call maintain minimum trampoline speed;
+            Stop(this script);
+        }
         If (abs((Motion.XPosition() - SCREEN.X.OFFSET)) > 160)
         {
             Looks.SetSizeTo(1000);
             Motion.ChangeXBy(( - (unit.vel.x * delta)));
             Motion.ChangeYBy(( - (unit.vel.y * delta)));
-            Looks.SetSizeTo((ball.size * 15));
+            Looks.SetSizeTo((scale * 15));
             Call calculate bounce velocity(vel.x)(vel.y)(((((Motion.XPosition() - SCREEN.X.OFFSET) < 0) * 2) - 1))(0);
             Stop(this script);
         }
@@ -472,7 +575,7 @@ Define update ball (warp=true)
                 Looks.SetSizeTo(1000);
                 Motion.ChangeXBy(( - (unit.vel.x * delta)));
                 Motion.ChangeYBy(( - (unit.vel.y * delta)));
-                Looks.SetSizeTo((ball.size * 15));
+                Looks.SetSizeTo((scale * 15));
                 collided? = 1;
                 Stop(this script);
             }
@@ -481,16 +584,12 @@ Define update ball (warp=true)
 }
 
 
-//----- Orphaned blocks -----------------------------------------------------------------------------------------------
-
-ball2
-
-
 //----- Costumes ------------------------------------------------------------------------------------------------------
 
 ball1.svg
 ball2.svg
 fireball.svg
+quad.svg
 
 
 //----- Sounds --------------------------------------------------------------------------------------------------------

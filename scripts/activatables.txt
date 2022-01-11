@@ -1,0 +1,102 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+fire activated? = 0
+freeze activated? = 0
+growth activated? = 0
+multiball activated? = 0
+nuke activated? = 0
+poly-up activated? = 0
+quad-damage activated? = 0
+scatter activated? = 0
+trampoline activated? = 0
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(activate freeze)
+{
+    freeze activated? = 1;
+}
+
+WhenBroadcastReceived(initialise)
+{
+    clone? = 0;
+    Looks.SwitchCostumeTo(freeze);
+    Motion.GoToXY(220, 158);
+    Looks.SetSizeTo(50);
+    Costume.GoToFrontBack(front);
+    Looks.Hide();
+    Call initialise;
+}
+
+WhenBroadcastReceived(reset activatables)
+{
+    Call reset activatables;
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define //TODO(string comment) (warp=true)
+{
+}
+
+Define initialise (warp=true)
+{
+    Motion.SetY(158);
+    Repeat (3)
+    {
+        Motion.SetX(134);
+        Repeat (3)
+        {
+            Control.CreateCloneOf(_myself_);
+            Looks.NextCostume();
+            Motion.ChangeXBy(42);
+        }
+        Motion.ChangeYBy(-42);
+    }
+    Call reset activatables;
+}
+
+Define reset activatables (warp=false)
+{
+    fire activated? = 0;
+    growth activated? = 0;
+    multiball activated? = 0;
+    quad-damage activated? = 0;
+    trampoline activated? = 0;
+    freeze activated? = 0;
+    Call //TODO("The following have not been implemented yet");
+    nuke activated? = 0;
+    poly-up activated? = 0;
+    scatter activated? = 0;
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+boom.svg
+bounce-floor.svg
+fire.svg
+freeze.svg
+grow.svg
+multiball.svg
+poly-up.svg
+quad-damage.svg
+scatter.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav
