@@ -32,7 +32,7 @@ WhenBroadcastReceived(update hud)
         {
             If (clone.name == "rows")
             {
-                Call display number(Sensing.Of(row, manager)) character position(clone.id) with digit count(3) and padding();
+                Call display number(Sensing.Of(row, managerSprite1)) character position(clone.id) with digit count(3) and padding();
             }
             Else
             {
@@ -77,10 +77,10 @@ Define display number(string number) character position(string pos) with digit c
 
 Define initialise (warp=true)
 {
-    Looks.SetSizeTo(100);
+    Looks.SetSizeTo(70);
     clone.name = "score";
     clone.id = 1;
-    Motion.GoToXY(133, 36);
+    Motion.GoToXY(133, 6);
     Repeat (6)
     {
         Control.CreateCloneOf(_myself_);
@@ -89,7 +89,7 @@ Define initialise (warp=true)
     }
     clone.name = "rows";
     clone.id = 1;
-    Motion.GoToXY(159, -54);
+    Motion.GoToXY(159, -62);
     Repeat (3)
     {
         Control.CreateCloneOf(_myself_);

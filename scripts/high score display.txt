@@ -1,6 +1,6 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
-added? = false
+added? = true
 characters = -_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
 CHAR HEIGHT = 16
 CHAR WIDTH = 10

@@ -4,10 +4,10 @@ angle = -270
 ball.id = 0
 ball.multiplier = 1
 ball.size = 3
-clone.id = 8
+clone.id = 20
 clone? = 0
 collided? = 0
-counter = 102
+counter = 251
 damage = 0
 delta = 0.97220017082316
 delta.x = 0
@@ -19,7 +19,7 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 7
+launched ball count = 19
 launching? = 0
 magnitude = 20.416203587286
 normal.angle = -352
@@ -34,8 +34,8 @@ unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
 unit.vel.x = 0.14735872647523
 unit.vel.y = -0.98908311366214
-vel.x = -2.8833861917375
-vel.y = -19.81022888622
+vel.x = -8.2802950330306
+vel.y = -18.382264696691
 velocity = 0
 x = 0
 y = 180
@@ -212,7 +212,7 @@ Define bonus +2 ball (warp=true)
 
 Define bonus grow (warp=true)
 {
-    ball.size = 4;
+    ball.size += 1;
     List.ReplaceItem(Ball.size, clone.id, ball.size);
     If (Sensing.Of(growth activated?, activatables) == 0)
     {
@@ -226,6 +226,22 @@ Define bonus grow (warp=true)
 
 Define bonus power up (warp=true)
 {
+    Call //TODO("This needs to be limited");
+    Power += 1;
+}
+
+Define bonus shrink (warp=true)
+{
+    ball.size += -1;
+    List.ReplaceItem(Ball.size, clone.id, ball.size);
+    If (Sensing.Of(growth activated?, activatables) == 0)
+    {
+        scale = ball.size;
+    }
+    Else
+    {
+        scale = 6;
+    }
 }
 
 Define bonus x2 damage (warp=true)
@@ -268,6 +284,10 @@ Define calculate bonus collision (warp=true)
     {
         Stop(this script);
     }
+    If ((ball.size == 2) And (Bonus.type[ball.id] == BONUS.SHRINK))
+    {
+        Stop(this script);
+    }
     List.ReplaceItem(Bonus.hits remaining, ball.id, 0);
     If (Bonus.type[ball.id] == BONUS.+1 BALL)
     {
@@ -299,6 +319,10 @@ Define calculate bonus collision (warp=true)
                     }
                     Else
                     {
+                        If (Bonus.type[ball.id] == BONUS.SHRINK)
+                        {
+                            Call bonus shrink;
+                        }
                     }
                 }
             }

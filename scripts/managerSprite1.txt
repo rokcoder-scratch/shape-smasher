@@ -1,0 +1,266 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+clone? = 0
+column = 5
+columns = 6
+counter = 0
+index = 7
+points = 1
+pressed? = 1
+row = 38
+total = 0
+
+
+//----- Lists ---------------------------------------------------------------------------------------------------------
+
+hit distribution = { 
+    68
+    0
+    0
+    4
+    4
+    4
+}
+
+
+//----- Green flag events ---------------------------------------------------------------------------------------------
+
+WhenGreenFlagClicked()
+{
+    Pen.Clear();
+    Looks.Hide();
+    Sound.SetVolumeTo(100);
+    Event.Broadcast("play music");
+    Control.CreateCloneOf(_myself_);
+    row = 0;
+    clone? = 0;
+    SCREEN.X.OFFSET = -46;
+    Motion.GoToXY(SCREEN.X.OFFSET, 0);
+    Event.BroadcastAndWait("initialise");
+    Score = 0;
+    Costume.GoToFrontBack(front);
+    Costume.MoveLayers(backward, 1);
+    Event.Broadcast("update hud");
+    Forever
+    {
+        Event.BroadcastAndWait("High Scores");
+        Event.Broadcast("fade out title");
+        Event.BroadcastAndWait("reset game");
+        Score = 0;
+        Call add row;
+        Game over? = 0;
+        Repeat Until (Game over? == 1)
+        {
+            Event.BroadcastAndWait("prepare counters");
+            If (Sensing.Of(freeze activated?, activatables) == 0)
+            {
+                Call scroll on new row;
+            }
+            Else
+            {
+                Call judder new row;
+            }
+            Event.Broadcast("reset activatables");
+            If (Game over? == 0)
+            {
+                Event.Broadcast("update hud");
+                Call get target;
+                Call play level;
+                If (Sensing.Of(freeze activated?, activatables) == 0)
+                {
+                    Call add row;
+                }
+            }
+        }
+        Event.Broadcast("fade in title");
+        Event.BroadcastAndWait("update high score table");
+        Event.Broadcast("remove sprites");
+    }
+}
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(music off)
+{
+    Sound.SetVolumeTo(0);
+}
+
+WhenBroadcastReceived(music on)
+{
+    Sound.SetVolumeTo(100);
+}
+
+WhenBroadcastReceived(play music)
+{
+    If (Operator.Random(0.0 / 1.0) < 0.5)
+    {
+        Sound.PlayUntilDone(Purple Planet Music - Mirrorball (1_58) 140bpm);
+    }
+    Forever
+    {
+        Sound.PlayUntilDone(what's up);
+        Sound.PlayUntilDone(Purple Planet Music - Mirrorball (1_58) 140bpm);
+    }
+}
+
+WhenBroadcastReceived(reset game)
+{
+    List.DeleteAll(NewRow.ObstacleData);
+    List.DeleteAll(NewRow.BonusData);
+    row = 0;
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+}
+
+
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define add row (warp=true)
+{
+    columns = (7 - ((row % 2) == 1));
+    total = (columns + (row * 2));
+    List.DeleteAll(hit distribution);
+    Repeat (columns)
+    {
+        List.Add(hit distribution, 0);
+    }
+    Repeat Until (total == 0)
+    {
+        column = Operator.Random(1 / columns);
+        points = Operator.Random(1 / total);
+        List.ReplaceItem(hit distribution, column, (hit distribution[column] + points));
+        total += ( - points);
+    }
+    index = 1;
+    Repeat (columns)
+    {
+        If ((hit distribution[index] > 0) Or (Operator.Random(0.0 / 1.0) < 0.2))
+        {
+            If (hit distribution[index] > 0)
+            {
+                List.Add(NewRow.ObstacleData, (SCREEN.X.OFFSET + ((22.5 * ((row % 2) == 1)) - ((4 - index) * 45))));
+                List.Add(NewRow.ObstacleData, hit distribution[index]);
+                Control.CreateCloneOf(obstacles);
+            }
+            Else
+            {
+                List.Add(NewRow.BonusData, (SCREEN.X.OFFSET + ((22.5 * ((row % 2) == 1)) - ((4 - index) * 45))));
+                Control.CreateCloneOf(bonuses);
+            }
+        }
+        index += 1;
+    }
+    row += 1;
+}
+
+Define get target (warp=false)
+{
+    Event.Broadcast("prepare target");
+    Event.BroadcastAndWait("show available activatables");
+    Sensing.ResetTimer();
+    counter = -1;
+    pressed? = Sensing.MouseDown();
+    Forever
+    {
+        Event.Broadcast("calculate target velocity");
+        Event.Broadcast("show target");
+        Event.Broadcast("update objects appearence");
+        If ((Sensing.MouseX() > -210) And (Sensing.MouseX() < 120))
+        {
+            If ((Not (Sensing.MouseDown())) And (pressed? == 1))
+            {
+                If (counter == 0)
+                {
+                    Event.Broadcast("remove target");
+                    Event.Broadcast("hide activatables");
+                    Stop(this script);
+                }
+                pressed? = 0;
+            }
+            If (Sensing.MouseDown() And (pressed? == 0))
+            {
+                If (counter == 0)
+                {
+                    Event.Broadcast("remove target");
+                    Stop(this script);
+                }
+                pressed? = 1;
+                counter = 0;
+            }
+        }
+    }
+}
+
+Define judder new row (warp=false)
+{
+    Event.Broadcast("shake padlock");
+    Repeat (16)
+    {
+        Event.Broadcast("raise row by three pixels");
+        Event.Broadcast("update object positions");
+        Event.Broadcast("update objects appearence");
+        Control.Wait(0);
+        Event.Broadcast("drop by 3 pixels");
+        Event.Broadcast("update object positions");
+        Event.Broadcast("update objects appearence");
+    }
+    Event.Broadcast("remove padlock");
+}
+
+Define play level (warp=false)
+{
+    Event.Broadcast("reset balls");
+    All balls gone? = 0;
+    If (Sensing.Of(trampoline activated?, activatables) == 1)
+    {
+        Control.CreateCloneOf(trampoline);
+    }
+    Else
+    {
+        If (Sensing.Of(freeze activated?, activatables) == 1)
+        {
+            Control.CreateCloneOf(padlock);
+        }
+    }
+    Repeat Until (All balls gone? == 1)
+    {
+        Pen.Clear();
+        Event.Broadcast("hide effects");
+        Event.Broadcast("update ball");
+        Event.Broadcast("update hits on objects");
+        Event.Broadcast("update objects appearence");
+        Event.Broadcast("update hud");
+    }
+    Event.Broadcast("remove trampoline");
+}
+
+Define scroll on new row (warp=false)
+{
+    Repeat (15)
+    {
+        Event.Broadcast("raise row by three pixels");
+        Event.Broadcast("update object positions");
+        Event.Broadcast("update objects appearence");
+    }
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+background.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+game over.mp3
+Pop.wav
+Purple Planet Music - Mirrorball (1_58) 140bpm.mp3
+what's up.mp3

@@ -1,0 +1,109 @@
+//----- Variables -----------------------------------------------------------------------------------------------------
+
+BAR.BASE = -304
+clone? = 0
+POINTS PER SECTION = 1
+SECTION HEIGHT = 34
+selected bar = 0
+target = 100
+type = 1
+TYPE.BAR = 2
+TYPE.HIGHLIGHT = 3
+TYPE.METER = 1
+
+
+
+//----- Broadcast received events -------------------------------------------------------------------------------------
+
+WhenBroadcastReceived(initialise)
+{
+    clone? = 0;
+    TYPE.METER = 1;
+    TYPE.BAR = 2;
+    TYPE.HIGHLIGHT = 3;
+    SECTION HEIGHT = 34;
+    BAR.BASE = -304;
+    POINTS PER SECTION = 1;
+    Costume.GoToFrontBack(front);
+    Looks.Hide();
+    Looks.ClearGraphicEffects();
+    type = TYPE.BAR;
+    Looks.SwitchCostumeTo(bar);
+    Motion.GoToXY(SCREEN.X.OFFSET, BAR.BASE);
+    Control.CreateCloneOf(_myself_);
+    type = TYPE.HIGHLIGHT;
+    Looks.SetEffectTo(COLOR, 80);
+    target = 100;
+    Control.CreateCloneOf(_myself_);
+    Looks.ClearGraphicEffects();
+    type = TYPE.METER;
+    Looks.SwitchCostumeTo(meter);
+    Motion.GoToXY(SCREEN.X.OFFSET, 0);
+    Control.CreateCloneOf(_myself_);
+}
+
+WhenBroadcastReceived(reset game)
+{
+    If (clone? == 0)
+    {
+        Power = 0;
+    }
+}
+
+WhenBroadcastReceived(update objects appearence)
+{
+    If (clone? == 1)
+    {
+        If (type == TYPE.BAR)
+        {
+            If (Selected activatable > 0)
+            {
+                selected bar = (Power - Selected activatable);
+            }
+            Else
+            {
+                selected bar = (Power - Hovered activatable);
+            }
+            Hovered activatable = 0;
+            If (Motion.YPosition() < (BAR.BASE + (selected bar * SECTION HEIGHT)))
+            {
+                Motion.ChangeYBy(16);
+                If (Motion.YPosition() > (BAR.BASE + (selected bar * SECTION HEIGHT)))
+                {
+                    Motion.SetY((BAR.BASE + (selected bar * SECTION HEIGHT)));
+                }
+            }
+            Else
+            {
+                If (Motion.YPosition() > (BAR.BASE + (selected bar * SECTION HEIGHT)))
+                {
+                    Motion.ChangeYBy(-16);
+                    If (Motion.YPosition() < (BAR.BASE + (selected bar * SECTION HEIGHT)))
+                    {
+                        Motion.SetY((BAR.BASE + (selected bar * SECTION HEIGHT)));
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+//----- Start as clone ------------------------------------------------------------------------------------------------
+
+Control.WhenIStartAsClone()
+{
+    clone? = 1;
+    Looks.Show();
+}
+
+
+//----- Costumes ------------------------------------------------------------------------------------------------------
+
+bar.svg
+meter.svg
+
+
+//----- Sounds --------------------------------------------------------------------------------------------------------
+
+pop.wav

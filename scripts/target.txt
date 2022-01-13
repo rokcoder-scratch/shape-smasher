@@ -1,13 +1,13 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-delta.x = 220
-delta.y = -70
+delta.x = -82.802950330306
+delta.y = -203.82264696691
 frames = 10
 index = 11
-length = 77
-mouse.x = 21
-mouse.y = 180
+length = 103.61949623502
+mouse.x = -85
+mouse.y = 84
 t = 10.62
 
 
@@ -19,8 +19,11 @@ WhenBroadcastReceived(calculate target velocity)
     If (clone? == 0)
     {
         frames = 10;
-        mouse.x = Sensing.MouseX();
-        mouse.y = Sensing.MouseY();
+        If ((Sensing.MouseX() > -210) And (Sensing.MouseX() < 120))
+        {
+            mouse.x = Sensing.MouseX();
+            mouse.y = Sensing.MouseY();
+        }
         delta.x = (mouse.x - SCREEN.X.OFFSET);
         delta.y = (mouse.y - 180);
         length = sqrt(((delta.x * delta.x) + (delta.y * delta.y)));

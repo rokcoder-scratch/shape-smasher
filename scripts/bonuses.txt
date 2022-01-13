@@ -46,6 +46,7 @@ WhenBroadcastReceived(initialise)
     BONUS.x2 DAMAGE = 3;
     BONUS.POWER UP = 4;
     BONUS.GROW = 5;
+    BONUS.SHRINK = 6;
 }
 
 WhenBroadcastReceived(raise row by three pixels)
@@ -186,7 +187,7 @@ Control.WhenIStartAsClone()
 Define add obstacle (warp=true)
 {
     Looks.ClearGraphicEffects();
-    Looks.SwitchCostumeTo(Operator.Random(1 / 5));
+    Looks.SwitchCostumeTo(Operator.Random(1 / 6));
     Motion.PointInDirection(90);
     Looks.SetSizeTo(1000);
     Motion.GoToXY(NewRow.BonusData[1], -200);
@@ -208,6 +209,7 @@ Define add obstacle (warp=true)
 +2 ball.svg
 grow.svg
 power.svg
+shrink.svg
 x2 damage.svg
 
 
