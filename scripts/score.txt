@@ -32,7 +32,7 @@ WhenBroadcastReceived(update hud)
         {
             If (clone.name == "rows")
             {
-                Call display number(Sensing.Of(row, managerSprite1)) character position(clone.id) with digit count(3) and padding();
+                Call display number(Sensing.Of(row, manager)) character position(clone.id) with digit count(3) and padding();
             }
             Else
             {

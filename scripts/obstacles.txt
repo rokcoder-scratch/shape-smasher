@@ -203,7 +203,7 @@ Define add obstacle (warp=true)
     List.Add(Obstacle.type, Costume.GetNumberName(number));
     List.Add(Obstacle.hit?, 0);
     obstacle.id = List.Length(Obstacle.Hits remaining);
-    Looks.SetEffectTo(COLOR, ((Sensing.Of(row, managerSprite1) * 67) + (obstacle.id * 7)));
+    Looks.SetEffectTo(COLOR, ((Sensing.Of(row, manager) * 67) + (obstacle.id * 7)));
 }
 
 

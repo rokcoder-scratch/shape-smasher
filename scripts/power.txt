@@ -1,14 +1,12 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
-BAR.BASE = -304
+BAR.BASE = 0
 clone? = 0
 POINTS PER SECTION = 1
-SECTION HEIGHT = 34
+SECTION HEIGHT = 42
 selected bar = 0
-target = 100
 type = 1
 TYPE.BAR = 2
-TYPE.HIGHLIGHT = 3
 TYPE.METER = 1
 
 
@@ -20,22 +18,19 @@ WhenBroadcastReceived(initialise)
     clone? = 0;
     TYPE.METER = 1;
     TYPE.BAR = 2;
-    TYPE.HIGHLIGHT = 3;
-    SECTION HEIGHT = 34;
-    BAR.BASE = -304;
+    SECTION HEIGHT = 42;
+    BAR.BASE = 0;
     POINTS PER SECTION = 1;
     Costume.GoToFrontBack(front);
     Looks.Hide();
     Looks.ClearGraphicEffects();
     type = TYPE.BAR;
-    Looks.SwitchCostumeTo(bar);
+    Looks.SwitchCostumeTo(dot);
+    Looks.SetSizeTo(1000);
     Motion.GoToXY(SCREEN.X.OFFSET, BAR.BASE);
+    Looks.SetSizeTo(100);
+    Looks.SwitchCostumeTo(bar);
     Control.CreateCloneOf(_myself_);
-    type = TYPE.HIGHLIGHT;
-    Looks.SetEffectTo(COLOR, 80);
-    target = 100;
-    Control.CreateCloneOf(_myself_);
-    Looks.ClearGraphicEffects();
     type = TYPE.METER;
     Looks.SwitchCostumeTo(meter);
     Motion.GoToXY(SCREEN.X.OFFSET, 0);
@@ -46,7 +41,8 @@ WhenBroadcastReceived(reset game)
 {
     If (clone? == 0)
     {
-        Power = 0;
+        Call //TODO("Set to zero");
+        Power = 9;
     }
 }
 
@@ -65,6 +61,8 @@ WhenBroadcastReceived(update objects appearence)
                 selected bar = (Power - Hovered activatable);
             }
             Hovered activatable = 0;
+            Looks.SwitchCostumeTo(dot);
+            Looks.SetSizeTo(1000);
             If (Motion.YPosition() < (BAR.BASE + (selected bar * SECTION HEIGHT)))
             {
                 Motion.ChangeYBy(16);
@@ -84,6 +82,8 @@ WhenBroadcastReceived(update objects appearence)
                     }
                 }
             }
+            Looks.SetSizeTo(100);
+            Looks.SwitchCostumeTo(bar);
         }
     }
 }
@@ -98,9 +98,17 @@ Control.WhenIStartAsClone()
 }
 
 
+//----- Custom blocks -------------------------------------------------------------------------------------------------
+
+Define //TODO(string comment) (warp=false)
+{
+}
+
+
 //----- Costumes ------------------------------------------------------------------------------------------------------
 
 bar.svg
+dot.svg
 meter.svg
 
 

@@ -1,17 +1,11 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
+brightness = -100
+brightness.target = -100
 clone? = 0
-fire activated? = 0
-freeze activated? = 0
-ghost = 100
-growth activated? = 0
-multiball activated? = 0
-nuke activated? = 0
-poly-up activated? = 0
-quad-damage activated? = 0
-scatter activated? = 0
-target = 0
-trampoline activated? = 0
+ghost = 80
+ghost.target = 80
+targetting? = 1
 
 
 
@@ -19,61 +13,135 @@ trampoline activated? = 0
 
 WhenThisSpriteClicked()
 {
-    If (Selected activatable == Costume.GetNumberName(number))
+    If (targetting? == 1)
     {
-        Selected activatable = 0;
-    }
-    Else
-    {
-        Selected activatable = Costume.GetNumberName(number);
+        If (Costume.GetNumberName(number) > Power)
+        {
+        }
+        Else
+        {
+            If (Selected activatable == Costume.GetNumberName(number))
+            {
+                Selected activatable = 0;
+            }
+            Else
+            {
+                Selected activatable = Costume.GetNumberName(number);
+            }
+        }
     }
 }
 
 
 //----- Broadcast received events -------------------------------------------------------------------------------------
 
-WhenBroadcastReceived(activate freeze)
-{
-    freeze activated? = 1;
-}
-
 WhenBroadcastReceived(hide activatables)
 {
-    If (clone? == 1)
-    {
-        Repeat Until (ghost == 100)
-        {
-            ghost += 10;
-            Looks.SetEffectTo(GHOST, ghost);
-        }
-        Control.DeleteThisClone();
-    }
-    Else
-    {
-        Selected activatable = 0;
-        Hovered activatable = 0;
-    }
+    targetting? = 0;
 }
 
 WhenBroadcastReceived(initialise)
 {
     clone? = 0;
     Looks.Hide();
-    ghost = 100;
+    ghost = 80;
+    brightness = -100;
+    ghost.target = ghost;
+    brightness.target = brightness;
     Looks.SetEffectTo(GHOST, ghost);
+    Looks.SetEffectTo(BRIGHTNESS, brightness);
     Looks.SetSizeTo(50);
+    POWERUP.GROW = 1;
+    POWERUP.POLYUP = 2;
+    POWERUP.BOUNCEFLOOR = 3;
+    POWERUP.SCATTER = 4;
+    POWERUP.QUADDAMAGE = 5;
+    POWERUP.FREEZE = 6;
+    POWERUP.MULTIBALL = 7;
+    POWERUP.FIRE = 8;
+    POWERUP.BOOM = 9;
+    targetting? = 0;
+    Call create icons;
 }
 
 WhenBroadcastReceived(reset activatables)
 {
-    Call reset activatables;
+    Selected activatable = 0;
+    Hovered activatable = 0;
 }
 
 WhenBroadcastReceived(show available activatables)
 {
     Selected activatable = 0;
     Hovered activatable = 0;
-    Call create icons;
+    targetting? = 1;
+}
+
+WhenBroadcastReceived(update objects appearence)
+{
+    If (clone? == 1)
+    {
+        If (targetting? == 1)
+        {
+            brightness.target = ((Costume.GetNumberName(number) > Power) * -100);
+            If (Sensing.TouchingObject(_mouse_) And (Not ((Costume.GetNumberName(number) > Power))))
+            {
+                Hovered activatable = Costume.GetNumberName(number);
+            }
+            ghost.target = 50;
+            If (Costume.GetNumberName(number) == Selected activatable)
+            {
+                ghost.target = 0;
+            }
+            Else
+            {
+                If (Sensing.TouchingObject(_mouse_) And (Not ((Costume.GetNumberName(number) > Power))))
+                {
+                    ghost.target = 20;
+                }
+            }
+        }
+        Else
+        {
+            brightness.target = ((Costume.GetNumberName(number) > (Power - Selected activatable)) * -100);
+            If (Costume.GetNumberName(number) == Selected activatable)
+            {
+                ghost.target = 50;
+            }
+            Else
+            {
+                ghost.target = 90;
+            }
+        }
+        If (ghost > ghost.target)
+        {
+            ghost += -5;
+        }
+        Else
+        {
+            If (ghost < ghost.target)
+            {
+                ghost += 10;
+                If (ghost > ghost.target)
+                {
+                    ghost = ghost.target;
+                }
+            }
+        }
+        Looks.SetEffectTo(GHOST, ghost);
+        If (brightness > brightness.target)
+        {
+            brightness += -5;
+        }
+        Else
+        {
+            If (brightness < brightness.target)
+            {
+                brightness += 5;
+            }
+        }
+        Looks.SetEffectTo(BRIGHTNESS, brightness);
+    }
 }
 
 
@@ -83,46 +151,6 @@ Control.WhenIStartAsClone()
 {
     Looks.Show();
     clone? = 1;
-    Repeat (5)
-    {
-        ghost += -10;
-        Looks.SetEffectTo(GHOST, ghost);
-    }
-    Forever
-    {
-        If Sensing.TouchingObject(_mouse_)
-        {
-            Hovered activatable = Costume.GetNumberName(number);
-        }
-        target = 50;
-        If (Costume.GetNumberName(number) == Selected activatable)
-        {
-            target = 0;
-        }
-        Else
-        {
-            If Sensing.TouchingObject(_mouse_)
-            {
-                target = 20;
-            }
-        }
-        If (ghost > target)
-        {
-            ghost += -5;
-        }
-        Else
-        {
-            If (ghost < target)
-            {
-                ghost += 10;
-                If (ghost > target)
-                {
-                    ghost = target;
-                }
-            }
-        }
-        Looks.SetEffectTo(GHOST, ghost);
-    }
 }
 
 
@@ -135,28 +163,14 @@ Define //TODO(string comment) (warp=true)
 Define create icons (warp=true)
 {
     Costume.GoToFrontBack(front);
-    Looks.SwitchCostumeTo(Power);
+    Looks.SwitchCostumeTo(grow);
     Repeat (Power)
     {
-        Motion.SetX((218 - (((Power - Costume.GetNumberName(number)) % 3) * 42)));
-        Motion.SetY((158 - (floor(((Power - Costume.GetNumberName(number)) / 3)) * 42)));
+        Motion.SetX((134 + (((Costume.GetNumberName(number) - 1) % 3) * 42)));
+        Motion.SetY((158 - (floor(((Costume.GetNumberName(number) - 1) / 3)) * 42)));
         Control.CreateCloneOf(_myself_);
-        Looks.SwitchCostumeTo((Costume.GetNumberName(number) - 1));
+        Looks.NextCostume();
     }
-}
-
-Define reset activatables (warp=false)
-{
-    fire activated? = 0;
-    growth activated? = 0;
-    multiball activated? = 0;
-    quad-damage activated? = 0;
-    trampoline activated? = 0;
-    freeze activated? = 0;
-    Call //TODO("The following have not been implemented yet");
-    nuke activated? = 0;
-    poly-up activated? = 0;
-    scatter activated? = 0;
 }
 
 
