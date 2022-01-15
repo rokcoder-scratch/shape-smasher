@@ -6,12 +6,12 @@ CHAR HEIGHT = 16
 CHAR WIDTH = 10
 clone? = false
 highlight? = 
-i = 6
+i = 2
 index = 50
 maxTop = -60
 top = 0
 username = RokCoder
-x = 78
+x = 38
 y = -150
 y pos = 83
 

@@ -1,15 +1,15 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
-angle = -270
+angle = 
 ball.id = 0
 ball.multiplier = 1
 ball.size = 3
-clone.id = 10
+clone.id = 61
 clone? = 0
 collided? = 0
-counter = 129
+counter = 355
 damage = 0
-delta = 0.97220017082316
+delta = 2.7777777777778
 delta.x = 0
 delta.y = 0
 distance = 269.31313701424
@@ -19,8 +19,8 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 9
-launching? = 0
+launched ball count = 60
+launching? = 1
 magnitude = 20.416203587286
 normal.angle = -352
 obstacle.id = 1
@@ -34,8 +34,8 @@ unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
 unit.vel.x = 0.14735872647523
 unit.vel.y = -0.98908311366214
-vel.x = 12.616171575993
-vel.y = -16.023102251419
+vel.x = 6.2624847704301
+vel.y = -19.089838418066
 velocity = 0
 x = 0
 y = 180
@@ -43,6 +43,7 @@ y = 180
 
 //----- Lists ---------------------------------------------------------------------------------------------------------
 
+launch angles = { }
 trail.x = { 
     -56
     -56
@@ -70,13 +71,7 @@ WhenBroadcastReceived(initialise)
 
 WhenBroadcastReceived(reset balls)
 {
-    Motion.GoToXY(SCREEN.X.OFFSET, 180);
-    clone.id = 1;
-    counter = 0;
-    vel.x = Vel.x;
-    vel.y = Vel.y;
-    launching? = 1;
-    launched ball count = 0;
+    Call reset balls;
 }
 
 WhenBroadcastReceived(reset game)
@@ -103,6 +98,13 @@ WhenBroadcastReceived(update ball)
     {
         If ((launching? == 1) And ((counter % 6) == 0))
         {
+            If (Selected activatable == POWERUP.SCATTER)
+            {
+                angle = launch angles[1];
+                List.DeleteItem(launch angles, 1);
+                vel.x = (20 * sin(angle));
+                vel.y = (20 * cos(angle));
+            }
             launched ball count += 1;
             Active ball count += 1;
             Control.CreateCloneOf(_myself_);
@@ -549,6 +551,33 @@ Define maintain minimum trampoline speed (warp=true)
     vel.y = (vel.y * velocity);
 }
 
+Define reset balls (warp=true)
+{
+    Motion.GoToXY(SCREEN.X.OFFSET, 180);
+    clone.id = 1;
+    counter = 0;
+    vel.x = Vel.x;
+    vel.y = Vel.y;
+    launching? = 1;
+    launched ball count = 0;
+    If (Selected activatable == POWERUP.SCATTER)
+    {
+        angle = (180 + atan((Vel.x / Vel.y)));
+        delta = (150 / Ball count);
+        List.DeleteAll(launch angles);
+        List.Add(launch angles, angle);
+        Repeat ((Ball count - 1))
+        {
+            angle += delta;
+            If (angle > 255)
+            {
+                angle += -150;
+            }
+            List.InsertItem(launch angles, Operator.Random(2 / (List.Length(launch angles) + 1)), angle);
+        }
+    }
+}
+
 Define update ball (warp=true)
 {
     If 
@@ -579,10 +608,10 @@ Define update ball (warp=true)
             {
                 Looks.SetSizeTo(1000);
                 Motion.ChangeXBy(( - (unit.vel.x * delta)));
-                Motion.ChangeYBy(( - (unit.vel.y * delta)));
+                Motion.ChangeYBy((abs(unit.vel.y) * delta));
                 Looks.SetSizeTo((scale * 15));
             }
-            Call calculate bounce velocity(vel.x)(vel.y)(0)(1);
+            Call calculate bounce velocity(vel.x)(( - abs(vel.y)))(0)(1);
             Call maintain minimum trampoline speed;
             Stop(this script);
         }

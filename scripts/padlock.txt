@@ -18,7 +18,7 @@ WhenBroadcastReceived(remove padlock)
     If (clone? == 1)
     {
         Stop(other scripts in sprite);
-        Motion.GoToXY(-219, 127);
+        Motion.GoToXY(-219, 132);
         Motion.PointInDirection(90);
         Control.Wait(0.4);
         Repeat (10)
@@ -35,7 +35,7 @@ WhenBroadcastReceived(shake padlock)
     {
         Forever
         {
-            Motion.GoToXY(Operator.Random(-221.0 / -217.0), Operator.Random(125 / 129));
+            Motion.GoToXY(Operator.Random(-221.0 / -217.0), Operator.Random(130 / 134));
             Motion.PointInDirection(Operator.Random(84.0 / 96.0));
         }
     }
@@ -47,8 +47,8 @@ WhenBroadcastReceived(shake padlock)
 Control.WhenIStartAsClone()
 {
     clone? = 1;
-    Motion.GoToXY(-219, 127);
-    Looks.SetSizeTo(30);
+    Motion.GoToXY(-219, 132);
+    Looks.SetSizeTo(20);
     Costume.GoToFrontBack(front);
     Looks.Show();
     Repeat (10)

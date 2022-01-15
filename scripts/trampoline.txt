@@ -36,7 +36,7 @@ Control.WhenIStartAsClone()
     Forever
     {
         Motion.ChangeXBy(dir);
-        If ((Motion.XPosition() < -160) Or (Motion.XPosition() > 52))
+        If ((Motion.XPosition() < -150) Or (Motion.XPosition() > 44))
         {
             dir = ( - dir);
         }
@@ -54,7 +54,7 @@ Control.WhenIStartAsClone()
 
 //----- Costumes ------------------------------------------------------------------------------------------------------
 
-costume1.svg
+trampoline.svg
 
 
 //----- Sounds --------------------------------------------------------------------------------------------------------

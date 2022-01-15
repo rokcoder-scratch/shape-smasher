@@ -5,7 +5,7 @@ brightness.target = -100
 clone? = 0
 ghost = 80
 ghost.target = 80
-targetting? = 1
+targetting? = 0
 
 
 
@@ -66,6 +66,7 @@ WhenBroadcastReceived(initialise)
 
 WhenBroadcastReceived(reset activatables)
 {
+    Power += ( - Selected activatable);
     Selected activatable = 0;
     Hovered activatable = 0;
 }
@@ -106,11 +107,12 @@ WhenBroadcastReceived(update objects appearence)
             brightness.target = ((Costume.GetNumberName(number) > (Power - Selected activatable)) * -100);
             If (Costume.GetNumberName(number) == Selected activatable)
             {
-                ghost.target = 50;
+                ghost.target = 0;
+                brightness.target = 0;
             }
             Else
             {
-                ghost.target = 90;
+                ghost.target = 50;
             }
         }
         If (ghost > ghost.target)
@@ -164,7 +166,7 @@ Define create icons (warp=true)
 {
     Costume.GoToFrontBack(front);
     Looks.SwitchCostumeTo(grow);
-    Repeat (Power)
+    Repeat (9)
     {
         Motion.SetX((134 + (((Costume.GetNumberName(number) - 1) % 3) * 42)));
         Motion.SetY((158 - (floor(((Costume.GetNumberName(number) - 1) / 3)) * 42)));

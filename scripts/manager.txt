@@ -1,25 +1,27 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-column = 4
+column = 3
 columns = 6
-counter = -1
+counter = 0
+i = 1
 index = 7
 points = 2
-pressed? = 
-row = 10
+pressed? = 1
+row = 104
 total = 0
 
 
 //----- Lists ---------------------------------------------------------------------------------------------------------
 
+active blocks = { }
 hit distribution = { 
-    1
-    0
-    3
+    22
+    5
     2
+    24
+    159
     0
-    18
 }
 
 
@@ -60,7 +62,6 @@ WhenGreenFlagClicked()
             {
                 Call judder new row;
             }
-            Power += ( - Selected activatable);
             Event.Broadcast("reset activatables");
             If (Game over? == 0)
             {
@@ -124,6 +125,10 @@ Control.WhenIStartAsClone()
 
 //----- Custom blocks -------------------------------------------------------------------------------------------------
 
+Define //TODO(string comment) (warp=false)
+{
+}
+
 Define add row (warp=true)
 {
     columns = (7 - ((row % 2) == 1));
@@ -162,6 +167,64 @@ Define add row (warp=true)
     row += 1;
 }
 
+Define blocks go boom (warp=false)
+{
+    Call collect active block indexes;
+    Forever
+    {
+        If (List.Length(active blocks) == 0)
+        {
+            Stop(this script);
+        }
+        i = Operator.Random(1 / List.Length(active blocks));
+        index = active blocks[i];
+        List.DeleteItem(active blocks, i);
+        If (index > 0)
+        {
+            Score += (Obstacle.Hits remaining[index] * 5);
+            List.ReplaceItem(Obstacle.hit?, index, 1);
+            List.ReplaceItem(Obstacle.Hits remaining, index, 0);
+        }
+        Else
+        {
+            index = ( - index);
+            List.ReplaceItem(Bonus.hit?, index, 1);
+            List.ReplaceItem(Bonus.hits remaining, index, 0);
+        }
+        Repeat (4)
+        {
+            Event.Broadcast("update hits on objects");
+            Event.Broadcast("update objects appearence");
+            Event.Broadcast("update hud");
+        }
+    }
+}
+
+Define collect active block indexes (warp=true)
+{
+    List.DeleteAll(active blocks);
+    Call //TODO("Another case where I shouldn't be starting at one");
+    index = 1;
+    Repeat (List.Length(Obstacle.Hits remaining))
+    {
+        If (Obstacle.Hits remaining[index] > 0)
+        {
+            List.Add(active blocks, index);
+        }
+        index += 1;
+    }
+    Call //TODO("Another case where I shouldn't be starting at one");
+    index = 1;
+    Repeat (List.Length(Bonus.hits remaining))
+    {
+        If (Bonus.hits remaining[index] > 0)
+        {
+            List.Add(active blocks, ( - index));
+        }
+        index += 1;
+    }
+}
+
 Define get target (warp=false)
 {
     Event.Broadcast("prepare target");
@@ -174,7 +237,7 @@ Define get target (warp=false)
         Event.Broadcast("calculate target velocity");
         Event.Broadcast("show target");
         Event.Broadcast("update objects appearence");
-        If ((Sensing.MouseX() > -210) And (Sensing.MouseX() < 120))
+        If ((Sensing.MouseX() > -224) And (Sensing.MouseX() < 114))
         {
             If ((Not (Sensing.MouseDown())) And (pressed? == 1))
             {
@@ -219,28 +282,39 @@ Define judder new row (warp=false)
 Define play level (warp=false)
 {
     Event.Broadcast("reset balls");
-    All balls gone? = 0;
-    If (Selected activatable == POWERUP.BOUNCEFLOOR)
+    If (Selected activatable == POWERUP.BOOM)
     {
-        Control.CreateCloneOf(trampoline);
+        Call blocks go boom;
     }
     Else
     {
-        If (Selected activatable == POWERUP.FREEZE)
+        If (Selected activatable == POWERUP.POLYUP)
         {
-            Control.CreateCloneOf(padlock);
+            Event.Broadcast("poly up");
         }
+        All balls gone? = 0;
+        If (Selected activatable == POWERUP.BOUNCEFLOOR)
+        {
+            Control.CreateCloneOf(trampoline);
+        }
+        Else
+        {
+            If (Selected activatable == POWERUP.FREEZE)
+            {
+                Control.CreateCloneOf(padlock);
+            }
+        }
+        Repeat Until (All balls gone? == 1)
+        {
+            Pen.Clear();
+            Event.Broadcast("hide effects");
+            Event.Broadcast("update ball");
+            Event.Broadcast("update hits on objects");
+            Event.Broadcast("update objects appearence");
+            Event.Broadcast("update hud");
+        }
+        Event.Broadcast("remove trampoline");
     }
-    Repeat Until (All balls gone? == 1)
-    {
-        Pen.Clear();
-        Event.Broadcast("hide effects");
-        Event.Broadcast("update ball");
-        Event.Broadcast("update hits on objects");
-        Event.Broadcast("update objects appearence");
-        Event.Broadcast("update hud");
-    }
-    Event.Broadcast("remove trampoline");
 }
 
 Define scroll on new row (warp=false)

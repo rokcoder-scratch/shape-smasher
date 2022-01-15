@@ -3,7 +3,7 @@
 BAR.BASE = 0
 clone? = 0
 POINTS PER SECTION = 1
-SECTION HEIGHT = 42
+SECTION HEIGHT = 40
 selected bar = 0
 type = 1
 TYPE.BAR = 2
@@ -18,7 +18,7 @@ WhenBroadcastReceived(initialise)
     clone? = 0;
     TYPE.METER = 1;
     TYPE.BAR = 2;
-    SECTION HEIGHT = 42;
+    SECTION HEIGHT = 40;
     BAR.BASE = 0;
     POINTS PER SECTION = 1;
     Costume.GoToFrontBack(front);
@@ -41,8 +41,7 @@ WhenBroadcastReceived(reset game)
 {
     If (clone? == 0)
     {
-        Call //TODO("Set to zero");
-        Power = 9;
+        Power = 0;
     }
 }
 
@@ -65,21 +64,13 @@ WhenBroadcastReceived(update objects appearence)
             Looks.SetSizeTo(1000);
             If (Motion.YPosition() < (BAR.BASE + (selected bar * SECTION HEIGHT)))
             {
-                Motion.ChangeYBy(16);
-                If (Motion.YPosition() > (BAR.BASE + (selected bar * SECTION HEIGHT)))
-                {
-                    Motion.SetY((BAR.BASE + (selected bar * SECTION HEIGHT)));
-                }
+                Motion.ChangeYBy(10);
             }
             Else
             {
                 If (Motion.YPosition() > (BAR.BASE + (selected bar * SECTION HEIGHT)))
                 {
-                    Motion.ChangeYBy(-16);
-                    If (Motion.YPosition() < (BAR.BASE + (selected bar * SECTION HEIGHT)))
-                    {
-                        Motion.SetY((BAR.BASE + (selected bar * SECTION HEIGHT)));
-                    }
+                    Motion.ChangeYBy(-10);
                 }
             }
             Looks.SetSizeTo(100);

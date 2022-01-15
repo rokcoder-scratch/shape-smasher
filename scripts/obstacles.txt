@@ -56,6 +56,27 @@ WhenBroadcastReceived(initialise)
     clone.type = TYPE.OBSTACLE;
 }
 
+WhenBroadcastReceived(poly up)
+{
+    If ((clone? == 1) And (clone.type == TYPE.OBSTACLE))
+    {
+        If (Costume.GetNumberName(number) < 4)
+        {
+            Looks.NextCostume();
+            Looks.SetSizeTo(OBSTACLE.SIZE[Costume.GetNumberName(number)]);
+            List.ReplaceItem(Obstacle.scale, obstacle.id, Looks.Size());
+            List.ReplaceItem(Obstacle.type, obstacle.id, Costume.GetNumberName(number));
+            List.ReplaceItem(Obstacle.hit?, obstacle.id, 1);
+        }
+        Else
+        {
+            Score += (Obstacle.Hits remaining[obstacle.id] * 5);
+            List.ReplaceItem(Obstacle.Hits remaining, obstacle.id, 0);
+            List.ReplaceItem(Obstacle.hit?, obstacle.id, 1);
+        }
+    }
+}
+
 WhenBroadcastReceived(raise row by three pixels)
 {
     If (clone? == 1)
