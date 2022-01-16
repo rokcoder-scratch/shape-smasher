@@ -3,11 +3,14 @@
 angle = 
 ball.id = 0
 ball.multiplier = 1
+BALL.RADIUS = 12
 ball.size = 3
-clone.id = 61
+centre.x = 0
+centre.y = 0
+clone.id = 2
 clone? = 0
 collided? = 0
-counter = 355
+counter = 198
 damage = 0
 delta = 2.7777777777778
 delta.x = 0
@@ -19,11 +22,17 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 60
-launching? = 1
+launched ball count = 1
+launching? = 0
 magnitude = 20.416203587286
 normal.angle = -352
 obstacle.id = 1
+p1 = 0
+p1.x = 0
+p1.y = 0
+p2 = 0
+p2.x = 0
+p2.y = 0
 point.x = 115
 point.y = -152.4
 scale = 3
@@ -34,8 +43,8 @@ unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
 unit.vel.x = 0.14735872647523
 unit.vel.y = -0.98908311366214
-vel.x = 6.2624847704301
-vel.y = -19.089838418066
+vel.x = 15.691028565342
+vel.y = -13.420493590077
 velocity = 0
 x = 0
 y = 180
@@ -64,6 +73,7 @@ WhenBroadcastReceived(initialise)
     SfxVolume = 100;
     clone? = 0;
     GRAVITY = -0.4;
+    BALL.RADIUS = 12;
     Looks.SetSizeTo(50);
     Looks.Hide();
     Ball count = 0;
@@ -363,31 +373,34 @@ Define calculate collision normal (warp=true)
     }
     Else
     {
+        centre.x = Obstacle.x[obstacle.id];
+        centre.y = Obstacle.y[obstacle.id];
         sides = (Obstacle.type[obstacle.id] + 2);
         height = ((100 - (38 * (sides == 3))) * (Obstacle.scale[obstacle.id] / 100));
-        distance.min = 1000;
         angle = Obstacle.rotation[obstacle.id];
-        point.x = (Obstacle.x[obstacle.id] + ((( - (Obstacle.scale[obstacle.id] / 2)) * sin(angle)) - (( - (height / 2)) * cos(angle))));
-        point.y = (Obstacle.y[obstacle.id] + ((( - (height / 2)) * sin(angle)) + (( - (Obstacle.scale[obstacle.id] / 2)) * cos(angle))));
-        temp.x = (Motion.XPosition() + (unit.vel.x * 6.5));
-        temp.y = (Motion.YPosition() + (unit.vel.y * 6.5));
+        p1.x = (Obstacle.x[obstacle.id] + ((( - (Obstacle.scale[obstacle.id] / 2)) * sin(angle)) - (( - (height / 2)) * cos(angle))));
+        p1.y = (Obstacle.y[obstacle.id] + ((( - (height / 2)) * sin(angle)) + (( - (Obstacle.scale[obstacle.id] / 2)) * cos(angle))));
+        p1 = (((p1.x - centre.x) * (Motion.YPosition() - centre.y)) - ((p1.y - centre.y) * (Motion.XPosition() - centre.x)));
         Repeat (sides)
         {
-            distance = abs(((sin(angle) * (point.y - temp.y)) - (cos(angle) * (point.x - temp.x))));
-            If (distance < distance.min)
+            p2.x = (p1.x + (Obstacle.scale[obstacle.id] * sin(angle)));
+            p2.y = (p1.y + (Obstacle.scale[obstacle.id] * cos(angle)));
+            p2 = (((p2.x - centre.x) * (Motion.YPosition() - centre.y)) - ((p2.y - centre.y) * (Motion.XPosition() - centre.x)));
+            If ((p1 > 0) And (p2 < 0))
             {
-                If (((cos(angle) * unit.vel.x) + (( - sin(angle)) * unit.vel.y)) < 0)
-                {
-                    distance.min = distance;
-                    normal.angle = angle;
-                }
+                normal.angle = angle;
+                unit.normal.x = cos(normal.angle);
+                unit.normal.y = ( - sin(normal.angle));
+                Stop(this script);
             }
-            point.x += (Obstacle.scale[obstacle.id] * sin(angle));
-            point.y += (Obstacle.scale[obstacle.id] * cos(angle));
             angle += (-360 / sides);
+            p1.x = p2.x;
+            p1.y = p2.y;
+            p1 = p2;
         }
-        unit.normal.x = cos(normal.angle);
-        unit.normal.y = ( - sin(normal.angle));
+        Call ​​breakpoint​​;
+        Call //TODO("No collision?");
+        Stop(all);
     }
 }
 
