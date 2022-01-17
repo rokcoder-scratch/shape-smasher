@@ -2,8 +2,9 @@
 
 clone.type = 0
 clone? = 0
+delta rot = 
 effect.counter = 0
-hits remaining = 0
+hits remaining = 
 obstacle.id = 9
 TYPE.DESTROYED = 2
 TYPE.EFFECT = 1
@@ -30,6 +31,14 @@ WhenBroadcastReceived(drop by 3 pixels)
         {
             List.ReplaceItem(Obstacle.y, obstacle.id, (Obstacle.y[obstacle.id] + -3));
         }
+    }
+}
+
+WhenBroadcastReceived(freeze rotations)
+{
+    If (clone? == 1)
+    {
+        delta rot = 0;
     }
 }
 
@@ -163,6 +172,8 @@ WhenBroadcastReceived(update objects appearence)
 {
     If (clone? == 1)
     {
+        Motion.TurnRight(delta rot);
+        List.ReplaceItem(Obstacle.rotation, obstacle.id, Motion.Direction());
         If (clone.type == TYPE.EFFECT)
         {
             Looks.ChengeSizeBy(4);
@@ -212,6 +223,8 @@ Define add obstacle (warp=true)
     Looks.SetSizeTo(1000);
     Motion.GoToXY(NewRow.ObstacleData[1], -200);
     hits remaining = NewRow.ObstacleData[2];
+    delta rot = NewRow.ObstacleData[3];
+    List.DeleteItem(NewRow.ObstacleData, 1);
     List.DeleteItem(NewRow.ObstacleData, 1);
     List.DeleteItem(NewRow.ObstacleData, 1);
     Looks.SetSizeTo(OBSTACLE.SIZE[Costume.GetNumberName(number)]);
@@ -224,7 +237,7 @@ Define add obstacle (warp=true)
     List.Add(Obstacle.type, Costume.GetNumberName(number));
     List.Add(Obstacle.hit?, 0);
     obstacle.id = List.Length(Obstacle.Hits remaining);
-    Looks.SetEffectTo(COLOR, ((Sensing.Of(row, manager) * 67) + (obstacle.id * 7)));
+    Looks.SetEffectTo(COLOR, (Sensing.Of(row, manager) * 23));
 }
 
 
@@ -238,4 +251,4 @@ triangle.svg
 
 //----- Sounds --------------------------------------------------------------------------------------------------------
 
-pop.wav
+game over.mp3

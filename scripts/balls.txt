@@ -1,18 +1,18 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
-angle = 
+angle = 246.81267417581
 ball.id = 0
 ball.multiplier = 1
 BALL.RADIUS = 12
 ball.size = 3
 centre.x = 0
 centre.y = 0
-clone.id = 2
+clone.id = 16
 clone? = 0
 collided? = 0
-counter = 198
+counter = 115
 damage = 0
-delta = 2.7777777777778
+delta = 30
 delta.x = 0
 delta.y = 0
 distance = 269.31313701424
@@ -22,7 +22,7 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 1
+launched ball count = 15
 launching? = 0
 magnitude = 20.416203587286
 normal.angle = -352
@@ -43,8 +43,8 @@ unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
 unit.vel.x = 0.14735872647523
 unit.vel.y = -0.98908311366214
-vel.x = 15.691028565342
-vel.y = -13.420493590077
+vel.x = 13.518766548954
+vel.y = -15.356351891883
 velocity = 0
 x = 0
 y = 180
@@ -398,9 +398,6 @@ Define calculate collision normal (warp=true)
             p1.y = p2.y;
             p1 = p2;
         }
-        Call ​​breakpoint​​;
-        Call //TODO("No collision?");
-        Stop(all);
     }
 }
 
@@ -413,6 +410,7 @@ Define calculate obstacle collision (warp=true)
     }
     Call calculate collision normal;
     Call calculate bounce velocity(vel.x)(vel.y)(unit.normal.x)(unit.normal.y);
+    Call propel out of collision;
     Call maintain minimum ball speed;
 }
 
@@ -504,25 +502,7 @@ Define draw trail (warp=true)
 
 Define find touching (warp=true)
 {
-    Call //TODO("index 1 may have long gone - should start from the least id that's on the screen");
-    index = 1;
-    obstacle.id = 0;
-    distance.min = 100000;
-    Repeat (List.Length(Obstacle.Hits remaining))
-    {
-        If (Obstacle.Hits remaining[index] > 0)
-        {
-            delta.x = (Motion.XPosition() - Obstacle.x[index]);
-            delta.y = (Motion.YPosition() - Obstacle.y[index]);
-            distance = ((delta.x * delta.x) + (delta.y * delta.y));
-            If (distance < distance.min)
-            {
-                obstacle.id = index;
-                distance.min = distance;
-            }
-        }
-        index += 1;
-    }
+    Call obstacle.id = nearest obstacle to ball;
     List.ReplaceItem(Obstacle.hit?, obstacle.id, 1);
     If (Selected activatable == POWERUP.FIRE)
     {
@@ -564,6 +544,46 @@ Define maintain minimum trampoline speed (warp=true)
     vel.y = (vel.y * velocity);
 }
 
+Define obstacle.id = nearest obstacle to ball (warp=true)
+{
+    Call //TODO("index 1 may have long gone - should start from the least id that's on the screen");
+    index = 1;
+    obstacle.id = 0;
+    distance.min = 100000;
+    Repeat (List.Length(Obstacle.Hits remaining))
+    {
+        If (Obstacle.Hits remaining[index] > 0)
+        {
+            delta.x = (Motion.XPosition() - Obstacle.x[index]);
+            delta.y = (Motion.YPosition() - Obstacle.y[index]);
+            distance = ((delta.x * delta.x) + (delta.y * delta.y));
+            If (distance < distance.min)
+            {
+                obstacle.id = index;
+                distance.min = distance;
+            }
+        }
+        index += 1;
+    }
+}
+
+Define propel out of collision (warp=true)
+{
+    id cache = obstacle.id;
+    Repeat Until (Not (Sensing.TouchingObject(obstacles)))
+    {
+        Looks.SetSizeTo(1000);
+        Motion.ChangeXBy(unit.normal.x);
+        Motion.ChangeYBy(unit.normal.y);
+        Looks.SetSizeTo((scale * 15));
+        Call obstacle.id = nearest obstacle to ball;
+        If (Not ((id cache == obstacle.id)))
+        {
+            Stop(this script);
+        }
+    }
+}
+
 Define reset balls (warp=true)
 {
     Motion.GoToXY(SCREEN.X.OFFSET, 180);
@@ -579,14 +599,29 @@ Define reset balls (warp=true)
         delta = (150 / Ball count);
         List.DeleteAll(launch angles);
         List.Add(launch angles, angle);
-        Repeat ((Ball count - 1))
+        If (angle > 180)
         {
-            angle += delta;
-            If (angle > 255)
+            Repeat ((Ball count - 1))
             {
-                angle += -150;
+                angle += ( - delta);
+                If (angle < 105)
+                {
+                    angle += 150;
+                }
+                List.Add(launch angles, angle);
             }
-            List.InsertItem(launch angles, Operator.Random(2 / (List.Length(launch angles) + 1)), angle);
+        }
+        Else
+        {
+            Repeat ((Ball count - 1))
+            {
+                angle += delta;
+                If (angle > 255)
+                {
+                    angle += -150;
+                }
+                List.Add(launch angles, angle);
+            }
         }
     }
 }
@@ -628,7 +663,7 @@ Define update ball (warp=true)
             Call maintain minimum trampoline speed;
             Stop(this script);
         }
-        If (abs((Motion.XPosition() - SCREEN.X.OFFSET)) > 160)
+        If (abs((Motion.XPosition() - SCREEN.X.OFFSET)) > (166 - ((BALL.RADIUS * Looks.Size()) / 100)))
         {
             Looks.SetSizeTo(1000);
             Motion.ChangeXBy(( - (unit.vel.x * delta)));
@@ -641,10 +676,6 @@ Define update ball (warp=true)
         {
             If Sensing.TouchingObject(obstacles)
             {
-                Looks.SetSizeTo(1000);
-                Motion.ChangeXBy(( - (unit.vel.x * delta)));
-                Motion.ChangeYBy(( - (unit.vel.y * delta)));
-                Looks.SetSizeTo((scale * 15));
                 collided? = 1;
                 Stop(this script);
             }

@@ -1,10 +1,17 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 bonus.id = 1
-BONUS.SIZE = 60
+BONUS.SIZE = 50
 clone.type = 0
 clone? = 0
 effect.counter = 0
+PROB +1 = 30
+PROB +2 = 15
+PROB GROW = 15
+PROB POWER UP = 25
+PROB SHRINK = 15
+PROB X2 = 30
+rand val = 0
 size cache = 0
 TYPE.BONUS = 0
 TYPE.DESTROYED = 2
@@ -40,13 +47,19 @@ WhenBroadcastReceived(initialise)
     TYPE.BONUS = 0;
     TYPE.EFFECT = 1;
     TYPE.DESTROYED = 2;
-    BONUS.SIZE = 60;
+    BONUS.SIZE = 50;
     BONUS.+1 BALL = 1;
     BONUS.+2 BALL = 2;
     BONUS.x2 DAMAGE = 3;
     BONUS.POWER UP = 4;
     BONUS.GROW = 5;
     BONUS.SHRINK = 6;
+    PROB +1 = 30;
+    PROB +2 = 15;
+    PROB X2 = 30;
+    PROB POWER UP = 25;
+    PROB GROW = 15;
+    PROB SHRINK = 15;
 }
 
 WhenBroadcastReceived(raise row by three pixels)
@@ -177,17 +190,57 @@ Control.WhenIStartAsClone()
     clone? = 1;
     If (clone.type == TYPE.BONUS)
     {
-        Call add obstacle;
+        Call add bonus;
     }
 }
 
 
 //----- Custom blocks -------------------------------------------------------------------------------------------------
 
-Define add obstacle (warp=true)
+Define add bonus (warp=true)
 {
     Looks.ClearGraphicEffects();
-    Looks.SwitchCostumeTo(Operator.Random(1 / 6));
+    rand val = Operator.Random(0 / 129);
+    If (rand val < PROB +1)
+    {
+        Looks.SwitchCostumeTo(+1 ball);
+    }
+    Else
+    {
+        rand val += ( - PROB +1);
+        If (rand val < PROB X2)
+        {
+            Looks.SwitchCostumeTo(x2 damage);
+        }
+        Else
+        {
+            rand val += ( - PROB X2);
+            If (rand val < PROB +2)
+            {
+                Looks.SwitchCostumeTo(+2 ball);
+            }
+            Else
+            {
+                rand val += ( - PROB +2);
+                If (rand val < PROB POWER UP)
+                {
+                    Looks.SwitchCostumeTo(power);
+                }
+                Else
+                {
+                    rand val += ( - PROB POWER UP);
+                    If (rand val < PROB GROW)
+                    {
+                        Looks.SwitchCostumeTo(grow);
+                    }
+                    Else
+                    {
+                        Looks.SwitchCostumeTo(shrink);
+                    }
+                }
+            }
+        }
+    }
     Motion.PointInDirection(90);
     Looks.SetSizeTo(1000);
     Motion.GoToXY(NewRow.BonusData[1], -200);

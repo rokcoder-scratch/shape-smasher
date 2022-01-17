@@ -1,12 +1,12 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-column = 7
+column = 5
 columns = 7
 counter = -1
 i = 1
 index = 8
-points = 9
+points = 1
 pressed? = 
 row = 0
 total = 0
@@ -17,12 +17,18 @@ total = 0
 active blocks = { }
 hit distribution = { 
     0
-    8
+    34
+    7
+    13
+    1
     0
     0
-    0
-    6
-    9
+}
+order = { 
+    4
+    3
+    2
+    1
 }
 
 
@@ -33,11 +39,12 @@ WhenGreenFlagClicked()
     Pen.Clear();
     Looks.Hide();
     Sound.SetVolumeTo(100);
+    Call initialise;
     Event.Broadcast("play music");
     Control.CreateCloneOf(_myself_);
     row = 0;
     clone? = 0;
-    SCREEN.X.OFFSET = -56;
+    SCREEN.X.OFFSET = -54;
     Motion.GoToXY(SCREEN.X.OFFSET, 0);
     Event.BroadcastAndWait("initialise");
     Score = 0;
@@ -96,14 +103,11 @@ WhenBroadcastReceived(music on)
 
 WhenBroadcastReceived(play music)
 {
-    If (Operator.Random(0.0 / 1.0) < 0.5)
-    {
-        Sound.PlayUntilDone(Purple Planet Music - Mirrorball (1_58) 140bpm);
-    }
     Forever
     {
-        Sound.PlayUntilDone(what's up);
-        Sound.PlayUntilDone(Purple Planet Music - Mirrorball (1_58) 140bpm);
+        Sound.PlayUntilDone(order[1]);
+        List.Add(order, order[1]);
+        List.DeleteItem(order, 1);
     }
 }
 
@@ -149,12 +153,34 @@ Define add row (warp=true)
     index = 1;
     Repeat (columns)
     {
-        If ((hit distribution[index] > 0) Or (Operator.Random(0.0 / 1.0) < 0.4))
+        If ((hit distribution[index] > 0) Or (Operator.Random(0.0 / 1.0) < (0.3 + (0.2 * (row < 5)))))
         {
             If (hit distribution[index] > 0)
             {
                 List.Add(NewRow.ObstacleData, (SCREEN.X.OFFSET + ((22.5 * ((row % 2) == 1)) - ((4 - index) * 45))));
                 List.Add(NewRow.ObstacleData, hit distribution[index]);
+                If (Operator.Random(0.0 / 1.0) < (row / 200))
+                {
+                    List.Add(NewRow.ObstacleData, Operator.Random((0.0 - (floor((row / 8)) / 32)) / (0.0 + (floor((row / 8)) / 32))));
+                }
+                Else
+                {
+                    If (Operator.Random(0 / 99) < 5)
+                    {
+                        If (Operator.Random(0 / 99) < 50)
+                        {
+                            List.Add(NewRow.ObstacleData, Operator.Random(-0.6 / -0.3));
+                        }
+                        Else
+                        {
+                            List.Add(NewRow.ObstacleData, Operator.Random(0.3 / 0.6));
+                        }
+                    }
+                    Else
+                    {
+                        List.Add(NewRow.ObstacleData, 0);
+                    }
+                }
                 Control.CreateCloneOf(obstacles);
             }
             Else
@@ -264,6 +290,15 @@ Define get target (warp=false)
     }
 }
 
+Define initialise (warp=true)
+{
+    List.DeleteAll(order);
+    Repeat (4)
+    {
+        List.InsertItem(order, Operator.Random(1 / (List.Length(order) + 1)), (List.Length(order) + 1));
+    }
+}
+
 Define judder new row (warp=false)
 {
     Event.Broadcast("shake padlock");
@@ -303,6 +338,7 @@ Define play level (warp=false)
             If (Selected activatable == POWERUP.FREEZE)
             {
                 Control.CreateCloneOf(padlock);
+                Event.Broadcast("freeze rotations");
             }
         }
         Repeat Until (All balls gone? == 1)
@@ -336,7 +372,7 @@ background.svg
 
 //----- Sounds --------------------------------------------------------------------------------------------------------
 
-game over.mp3
-Pop.wav
-Purple Planet Music - Mirrorball (1_58) 140bpm.mp3
-what's up.mp3
+bensound-buddy.mp3
+bensound-funnysong.mp3
+bensound-hey.mp3
+bensound-jazzyfrenchy.mp3

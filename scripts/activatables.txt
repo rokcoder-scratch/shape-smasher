@@ -3,8 +3,8 @@
 brightness = -100
 brightness.target = -100
 clone? = 0
-ghost = 80
-ghost.target = 80
+ghost = 50
+ghost.target = 50
 targetting? = 0
 
 
@@ -22,10 +22,12 @@ WhenThisSpriteClicked()
         {
             If (Selected activatable == Costume.GetNumberName(number))
             {
+                Sound.Play(cancel);
                 Selected activatable = 0;
             }
             Else
             {
+                Sound.Play(click);
                 Selected activatable = Costume.GetNumberName(number);
             }
         }
@@ -44,7 +46,7 @@ WhenBroadcastReceived(initialise)
 {
     clone? = 0;
     Looks.Hide();
-    ghost = 80;
+    ghost = 50;
     brightness = -100;
     ghost.target = ghost;
     brightness.target = brightness;
@@ -191,4 +193,5 @@ scatter.svg
 
 //----- Sounds --------------------------------------------------------------------------------------------------------
 
-pop.wav
+cancel.mp3
+click.mp3

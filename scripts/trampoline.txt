@@ -18,7 +18,10 @@ WhenBroadcastReceived(remove trampoline)
 {
     If (clone? == 1)
     {
-        Looks.ChangeEffectBy(GHOST, 10);
+        Repeat (10)
+        {
+            Looks.ChangeEffectBy(GHOST, 10);
+        }
     }
     Control.DeleteThisClone();
 }

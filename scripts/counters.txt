@@ -1,11 +1,11 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-counters exist up to index = 25
+counters exist up to index = 77
 digit = 1
 digits = 100
 hits remaining = 
-index = 26
+index = 78
 
 
 
