@@ -6,14 +6,14 @@ CHAR HEIGHT = 16
 CHAR WIDTH = 10
 clone? = false
 highlight? = 
-i = 2
+i = 7
 index = 50
 maxTop = -60
-top = 0
+top = -3.6
 username = RokCoder
-x = 38
-y = -150
-y pos = 83
+x = 88
+y = -164.4
+y pos = 79.4
 
 
 //----- Lists ---------------------------------------------------------------------------------------------------------
@@ -340,7 +340,7 @@ Define update scores (warp=false)
 {
     Event.BroadcastAndWait("High Scores Read");
     added? = "false";
-    Call add new high score(Score)(Sensing.Of(row, obstacles))(Ball count);
+    Call add new high score(Score)((Sensing.Of(row, manager) - 1))(Ball count);
     If (added? == "true")
     {
         Event.BroadcastAndWait("High Scores Write");

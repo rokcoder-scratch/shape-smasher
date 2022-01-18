@@ -7,10 +7,10 @@ BALL.RADIUS = 12
 ball.size = 3
 centre.x = 0
 centre.y = 0
-clone.id = 16
+clone.id = 2
 clone? = 0
 collided? = 0
-counter = 115
+counter = 99
 damage = 0
 delta = 30
 delta.x = 0
@@ -22,7 +22,7 @@ GRAVITY = -0.4
 height = 24.8
 id cache = 0
 index = 15
-launched ball count = 15
+launched ball count = 1
 launching? = 0
 magnitude = 20.416203587286
 normal.angle = -352
@@ -43,8 +43,8 @@ unit.normal.x = 0.9902680687
 unit.normal.y = -0.139173101
 unit.vel.x = 0.14735872647523
 unit.vel.y = -0.98908311366214
-vel.x = 13.518766548954
-vel.y = -15.356351891883
+vel.x = -1.6991348985587
+vel.y = -19.934286872303
 velocity = 0
 x = 0
 y = 180
@@ -667,7 +667,6 @@ Define update ball (warp=true)
         {
             Looks.SetSizeTo(1000);
             Motion.ChangeXBy(( - (unit.vel.x * delta)));
-            Motion.ChangeYBy(( - (unit.vel.y * delta)));
             Looks.SetSizeTo((scale * 15));
             Call calculate bounce velocity(vel.x)(vel.y)(((((Motion.XPosition() - SCREEN.X.OFFSET) < 0) * 2) - 1))(0);
             Stop(this script);

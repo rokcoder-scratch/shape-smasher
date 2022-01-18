@@ -1,12 +1,12 @@
 //----- Variables -----------------------------------------------------------------------------------------------------
 
 clone? = 0
-column = 5
-columns = 7
+column = 4
+columns = 6
 counter = -1
 i = 1
-index = 8
-points = 1
+index = 7
+points = 2
 pressed? = 
 row = 0
 total = 0
@@ -16,19 +16,18 @@ total = 0
 
 active blocks = { }
 hit distribution = { 
-    0
-    34
-    7
-    13
     1
+    0
+    9
+    2
     0
     0
 }
 order = { 
-    4
-    3
-    2
     1
+    4
+    2
+    3
 }
 
 
